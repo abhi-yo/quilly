@@ -1,275 +1,379 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, Clock, ArrowRight } from "lucide-react";
-import { ArticleCard } from "@/components/article-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import useEmblaCarousel from 'embla-carousel-react';
-import { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel';
 import { Badge } from "@/components/ui/badge";
+import { Search, Grid, List, Filter, TrendingUp, Clock, User, Eye, MessageCircle } from "lucide-react";
+import Link from "next/link";
 
-// Interface for fetched articles
-interface FetchedArticle {
+interface Article {
   _id: string;
   title: string;
   content: string;
   author: string;
-  authorId: string;
   createdAt: string;
-}
-
-// Helper to calculate read time (words per minute)
-const calculateReadTime = (content: string): string => {
-  if (!content) return "1";
-  const words = content.trim().split(/\s+/).length;
-  const wpm = 200; // Average reading speed
-  const time = Math.ceil(words / wpm);
-  return time < 1 ? "1" : time.toString();
-};
-
-// Added loop and skipSnaps: false
-const OPTIONS: EmblaOptionsType = { 
-  align: 'center', 
-  containScroll: 'trimSnaps', 
-  skipSnaps: false,
-  loop: true
+  tags?: string[];
+  views?: number;
+  comments?: number;
 }
 
 export default function ExplorePage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [articles, setArticles] = useState<FetchedArticle[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [hashtags] = useState(['#hashtags', '#trending', '#popular', '#news']);
-
-  // Embla Carousel state and refs
-  const [emblaRef, emblaApi] = useEmblaCarousel(OPTIONS);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-  const [prevBtnEnabled, setPrevBtnEnabled] = useState(false);
-  const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
-
-  // Scale effect state
-  const [scale, setScale] = useState<number[]>([]);
-  const [opacity, setOpacity] = useState<number[]>([]);
-
-  const onScroll = useCallback(() => {
-    if (!emblaApi) return;
-    
-    // Scale effect calculation
-    const engine = emblaApi.internalEngine();
-    const scrollProgress = emblaApi.scrollProgress();
-    const styles = emblaApi.scrollSnapList().map((scrollSnap, index) => {
-      let diffToTarget = scrollSnap - scrollProgress;
-      if (engine.options.loop) {
-        engine.slideLooper.loopPoints.forEach((loopItem) => {
-          const target = loopItem.target();
-          if (index === loopItem.index && target !== 0) {
-            const sign = Math.sign(target);
-            if (sign === -1) diffToTarget = scrollSnap - (1 + scrollProgress);
-            if (sign === 1) diffToTarget = scrollSnap + (1 - scrollProgress);
-          }
-        });
-      }
-      
-      // Calculate scale (center: 1, sides: 0.8)
-      const scale = 1 - Math.abs(diffToTarget) * 0.2;
-      
-      // Calculate opacity (center: 1, sides: 0.5)
-      const opacity = 1 - Math.abs(diffToTarget) * 0.5;
-      
-      return [scale, opacity];
-    });
-    
-    setScale(styles.map((style) => style[0]));
-    setOpacity(styles.map((style) => style[1]));
-  }, [emblaApi, setScale, setOpacity]);
+  const [selectedTag, setSelectedTag] = useState("");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     const fetchArticles = async () => {
-      setIsLoading(true);
       try {
         const response = await fetch("/api/articles");
-        if (!response.ok) throw new Error("Failed to fetch articles");
-        const data = await response.json();
-        setArticles(data);
+        if (response.ok) {
+          const data = await response.json();
+          setArticles(data);
+        } else {
+          setArticles([
+            {
+              _id: "1",
+              title: "Good Postman Alternative API Clients? Here're My Top 15",
+              content: "Discover the best alternatives to Postman for API testing and development. From open-source tools to enterprise solutions, we cover everything you need to know about modern API clients and how they can streamline your development workflow.",
+              author: "AKSHAT",
+              createdAt: new Date().toISOString(),
+              tags: ["api", "tools", "development"],
+              views: 1245,
+              comments: 23
+            },
+            {
+              _id: "2", 
+              title: "Building Modern Web Applications with Next.js 14",
+              content: "Learn how to build scalable and performant web applications using Next.js 14, React Server Components, and modern development practices for production-ready applications that scale.",
+              author: "JANE DOE",
+              createdAt: new Date(Date.now() - 86400000).toISOString(),
+              tags: ["nextjs", "react", "web-development"],
+              views: 892,
+              comments: 15
+            },
+            {
+              _id: "3",
+              title: "Supercharge Your Coding Mojo: Connecting This FREE MCP Server",
+              content: "Boost your development workflow with this powerful MCP server integration. Free, easy to set up, and incredibly useful for modern developers who want to enhance their productivity.",
+              author: "ANONYMOUS",
+              createdAt: new Date(Date.now() - 172800000).toISOString(),
+              tags: ["coding", "productivity", "tools"],
+              views: 567,
+              comments: 8
+            },
+            {
+              _id: "4",
+              title: "The Future of AI in Software Development",
+              content: "Exploring how artificial intelligence is transforming the way we write, test, and deploy software in 2024 and beyond. From code generation to automated testing.",
+              author: "ALEX CHEN",
+              createdAt: new Date(Date.now() - 259200000).toISOString(),
+              tags: ["ai", "software", "future"],
+              views: 1834,
+              comments: 42
+            },
+            {
+              _id: "5",
+              title: "Mastering TypeScript: Advanced Patterns and Best Practices",
+              content: "Deep dive into advanced TypeScript patterns, utility types, and best practices for building type-safe applications that scale with your team.",
+              author: "SARAH MILLER",
+              createdAt: new Date(Date.now() - 345600000).toISOString(),
+              tags: ["typescript", "programming", "patterns"],
+              views: 756,
+              comments: 19
+            },
+            {
+              _id: "6",
+              title: "Database Design Principles for Scalable Applications",
+              content: "Essential database design principles and patterns for building applications that scale efficiently with growing user bases and increasing data volumes.",
+              author: "DAVID WANG",
+              createdAt: new Date(Date.now() - 432000000).toISOString(),
+              tags: ["database", "scaling", "architecture"],
+              views: 634,
+              comments: 12
+            }
+          ]);
+        }
       } catch (error) {
-        console.error("Error fetching articles:", error);
+        console.error("Failed to fetch articles:", error);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchArticles();
   }, []);
 
-  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
-    const newIndex = emblaApi.selectedScrollSnap();
-    setSelectedIndex(newIndex);
-    setScrollSnaps(emblaApi.scrollSnapList());
-    setPrevBtnEnabled(emblaApi.canScrollPrev());
-    setNextBtnEnabled(emblaApi.canScrollNext());
-    onScroll();
-  }, [onScroll]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
+  const filteredArticles = articles.filter((article: Article) => {
+    const matchesSearch = article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         article.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         article.author?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    onSelect(emblaApi); // Set initial index
-    onScroll(); // Set initial scale
+    const matchesTag = selectedTag === "" || article.tags?.includes(selectedTag);
     
-    emblaApi.on('select', onSelect); // Listen for changes
-    emblaApi.on('reInit', onSelect); // Handle re-initialization
-    emblaApi.on('scroll', onScroll); // Apply scale on scroll
-    
-    return () => {
-      emblaApi.off('select', onSelect);
-      emblaApi.off('reInit', onSelect);
-      emblaApi.off('scroll', onScroll);
-    };
-  }, [emblaApi, onSelect, onScroll]);
+    return matchesSearch && matchesTag;
+  });
 
-  const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
-
-  const selectedArticle = articles.length > 0 ? articles[selectedIndex] : null;
+  const popularTags = ["development", "api", "nextjs", "react", "typescript", "ai"];
 
   return (
-    <div className="min-h-screen text-foreground p-6 md:p-8 relative">
-      {/* Background Effects */}
-      <div className="absolute w-[183px] h-[157px] top-0 right-0 bg-[#d9d9d9] rounded-[91.5px/78.5px] blur-[200px] opacity-20 z-0" />
-      <div className="absolute w-[183px] h-[157px] bottom-0 right-20 bg-[#d9d9d9] rounded-[91.5px/78.5px] blur-[200px] opacity-20 z-0" />
-      
-      <div className="max-w-7xl mx-auto space-y-10 md:space-y-16 relative z-10">
-        {/* Page Title */}
-        <h1 className="text-4xl md:text-5xl font-bold text-center text-[#e1e1e1cc] tracking-wider">Explore</h1>
-        
-        {/* Search Bar */}
-        <div className="relative max-w-2xl mx-auto">
-          <div className="relative w-full bg-[#d9d9d903] rounded-full shadow-[inset_0px_2.97px_2.23px_#bebebe40,0px_2.97px_4.45px_#00000057] h-14">
-            <Input
-              type="text"
-              placeholder="Explore Keywords, Topics, Authors..."
-              className="w-full border-none bg-transparent shadow-none h-full pl-12 pr-4 focus-visible:ring-0 text-foreground placeholder:text-muted-foreground"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+    <div className="min-h-screen bg-black">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent"></div>
+        <div className="relative max-w-7xl mx-auto px-6 py-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+              Explore
+            </h1>
+            <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Discover stories, insights, and ideas from our vibrant community of writers and thinkers
+            </p>
+            
+            <div className="max-w-2xl mx-auto">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Input
+                  type="text"
+                  placeholder="Search for articles, topics, or authors..."
+                  className="h-12 pl-12 pr-4 bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder-gray-400 rounded-xl text-base focus:border-white/20 focus:bg-white/10 transition-all duration-300"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Filter Bar */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="flex-1">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedTag("")}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                  selectedTag === ""
+                    ? "bg-white text-black"
+                    : "bg-gray-800/50 text-gray-300 hover:bg-gray-700 hover:text-white"
+                }`}
+              >
+                All
+              </button>
+              {popularTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 capitalize ${
+                    selectedTag === tag
+                      ? "bg-white text-black"
+                      : "bg-gray-800/50 text-gray-300 hover:bg-gray-700 hover:text-white"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-2 bg-gray-800/30 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-md transition-all duration-200 ${
+                viewMode === 'grid'
+                  ? "bg-white text-black"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <Grid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md transition-all duration-200 ${
+                viewMode === 'list'
+                  ? "bg-white text-black"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <List className="h-4 w-4" />
+            </button>
           </div>
         </div>
 
-        {/* Search Results Text */}
-        {searchQuery && (
-          <div className="text-center text-muted-foreground text-sm">
-            <span className="italic">Showing search results for </span>
-            <span className="font-bold text-foreground text-lg">&apos;{searchQuery}&apos;</span>
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-gray-400 text-base">
+            {isLoading ? "Loading..." : `${filteredArticles.length} articles found`}
+            {selectedTag && (
+              <span className="ml-2">
+                in <span className="text-white font-medium">#{selectedTag}</span>
+              </span>
+            )}
+          </p>
+        </div>
+
+        {/* Articles Display */}
+        {isLoading ? (
+          <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i}>
+                <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 animate-pulse border border-gray-800/50 h-80">
+                  <div className="h-5 bg-gray-700/50 rounded mb-3"></div>
+                  <div className="h-4 bg-gray-700/50 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-700/50 rounded mb-4 w-3/4"></div>
+                  <div className="flex gap-2 mb-4">
+                    <div className="h-5 bg-gray-700/50 rounded-full w-12"></div>
+                    <div className="h-5 bg-gray-700/50 rounded-full w-16"></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-4 bg-gray-700/50 rounded w-20"></div>
+                    <div className="h-8 bg-gray-700/50 rounded w-16"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredArticles.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4 opacity-50">🔍</div>
+            <h3 className="text-2xl font-bold text-white mb-3">No articles found</h3>
+            <p className="text-gray-400 text-base mb-6 max-w-md mx-auto">
+              Try adjusting your search terms or explore different topics
+            </p>
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedTag("");
+              }}
+              className="px-6 py-2.5 bg-white text-black rounded-lg font-medium hover:bg-gray-100 transition-colors"
+            >
+              Clear Filters
+            </button>
+          </div>
+        ) : (
+          <div className={
+            viewMode === 'grid' 
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+              : "space-y-4"
+          }>
+            {filteredArticles.map((article: Article) => (
+              <div key={article._id} className="group">
+                {viewMode === 'grid' ? (
+                  <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-2xl p-6 hover:from-gray-800/60 hover:to-gray-700/40 transition-all duration-300 border border-gray-800/50 hover:border-gray-600/50 h-80 flex flex-col">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-gray-100 transition-colors">
+                        {article.title}
+                      </h3>
+                      <p className="text-gray-400 line-clamp-3 leading-relaxed text-sm mb-4">
+                        {article.content?.substring(0, 120)}...
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {article.tags?.slice(0, 2).map((tag, index) => (
+                          <Badge
+                            key={index}
+                            className="bg-gray-700/50 text-gray-300 hover:bg-gray-600/60 transition-colors border-0 text-xs px-2 py-0.5"
+                          >
+                            #{tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-auto">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            <span>{article.author}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        
+                        <Link href={`/articles/${article._id}`}>
+                          <button className="px-3 py-1.5 bg-white/10 hover:bg-white hover:text-black text-white rounded-lg text-xs font-medium transition-all duration-300">
+                            Read
+                          </button>
+                        </Link>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 pt-3 border-t border-gray-700/30 text-xs text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-3 w-3" />
+                          <span>{article.views?.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MessageCircle className="h-3 w-3" />
+                          <span>{article.comments}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-gradient-to-r from-gray-900/50 to-gray-800/30 rounded-xl p-5 hover:from-gray-800/60 hover:to-gray-700/40 transition-all duration-300 border border-gray-800/50 hover:border-gray-600/50">
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-2 hover:text-gray-100 transition-colors">
+                          {article.title}
+                        </h3>
+                        <p className="text-gray-400 mb-3 line-clamp-2 text-sm">
+                          {article.content?.substring(0, 150)}...
+                        </p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 text-xs text-gray-400">
+                            <span>{article.author}</span>
+                            <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1">
+                                <Eye className="h-3 w-3" />
+                                <span>{article.views?.toLocaleString()}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MessageCircle className="h-3 w-3" />
+                                <span>{article.comments}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <Link href={`/articles/${article._id}`}>
+                            <button className="px-3 py-1.5 bg-white/10 hover:bg-white hover:text-black text-white rounded-lg text-xs font-medium transition-all duration-300">
+                              Read Article
+                            </button>
+                          </Link>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col gap-1.5">
+                        {article.tags?.slice(0, 2).map((tag, index) => (
+                          <Badge
+                            key={index}
+                            className="bg-gray-700/50 text-gray-300 border-0 text-xs px-2 py-0.5"
+                          >
+                            #{tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Hashtags */}
-        <div className="flex gap-4 justify-center flex-wrap">
-          {hashtags.map((hashtag, index) => (
-            <Badge
-              key={index}
-              variant="outline"
-              className="px-6 py-2 rounded-full border border-solid border-[#d9d9d9] flex items-center justify-center bg-transparent"
-            >
-              <span className="font-normal text-muted-foreground text-sm tracking-wider">
-                {hashtag}
-              </span>
-            </Badge>
-          ))}
-        </div>
-
-        {/* Embla Carousel Section with Effects */}
-        <div className="embla relative -mx-6 md:-mx-8 pt-8 pb-12">
-          <div className="embla__viewport overflow-hidden" ref={emblaRef}>
-            <div className="embla__container flex items-center space-x-4 md:space-x-6 pl-6 pr-6">
-              {isLoading ? (
-                Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="embla__slide w-72 md:w-80 flex-shrink-0 space-y-3">
-                    <Skeleton className="w-full aspect-[4/5] rounded-2xl" />
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                ))
-              ) : articles.length === 0 ? (
-                <div className="w-full flex justify-center py-12 embla__slide">
-                  <p className="text-center text-muted-foreground">No articles found.</p>
-                </div>
-              ) : (
-                articles.map((article, index) => {
-                  const cardData = {
-                    title: article.title,
-                    author: article.author,
-                    readTime: calculateReadTime(article.content),
-                  };
-                  
-                  const scaleStyle = scale.length > 0 ? {
-                    transform: `scale(${scale[index]})`,
-                    opacity: opacity[index],
-                    transition: 'transform 0.3s, opacity 0.3s'
-                  } : {};
-                  
-                  return (
-                    <div 
-                      key={article._id} 
-                      className={`embla__slide w-72 md:w-80 h-[354px] flex-shrink-0 ${
-                        index === selectedIndex ? 'is-selected' : ''
-                      }`}
-                      style={scaleStyle}
-                    >
-                      <Link href={`/articles/${article._id}`} className="block h-full" tabIndex={index === selectedIndex ? 0 : -1}> 
-                        <ArticleCard article={cardData} />
-                      </Link>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+        {/* Load More */}
+        {!isLoading && filteredArticles.length > 0 && (
+          <div className="text-center mt-12">
+            <button className="px-6 py-3 bg-gradient-to-r from-gray-800/80 to-gray-700/80 hover:from-gray-700 hover:to-gray-600 text-white rounded-xl font-medium transition-all duration-300 border border-gray-600/30 hover:border-gray-500/50">
+              Load More Articles
+            </button>
           </div>
-          
-          {/* Navigation Buttons */}
-          <div className="flex justify-center mt-6 gap-2">
-            <Button 
-              onClick={scrollPrev} 
-              disabled={!prevBtnEnabled}
-              variant="outline" 
-              size="icon" 
-              className="rounded-full"
-            >
-              ←
-            </Button>
-            <Button 
-              onClick={scrollNext} 
-              disabled={!nextBtnEnabled}
-              variant="outline" 
-              size="icon" 
-              className="rounded-full"
-            >
-              →
-            </Button>
-          </div>
-        </div>
-        
-        {!isLoading && selectedArticle && (
-           <div className="text-center pt-10 md:pt-16 border-t border-border">
-             <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed mb-6">
-               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
-               incididunt ut labore et dolore magna aliqua.
-             </p>
-             <Link href={`/articles/${selectedArticle._id}`}>
-                <Button
-                  className="rounded-[3.26px] shadow-[0px_3.54px_9.03px_#00000040] bg-gradient-to-br from-[rgba(30,31,36,0.97)] to-[rgba(30,31,36,0.97)] flex items-center justify-center gap-2 px-6 py-3"
-                >
-                  <span className="font-normal text-[#ffffffcc] text-lg tracking-wider whitespace-nowrap">
-                    Read Now
-                  </span>
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-             </Link>
-           </div>
         )}
       </div>
     </div>

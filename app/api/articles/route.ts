@@ -5,11 +5,27 @@ import { connectToDatabase } from "@/lib/db";
 import { Article } from "@/models/Article";
 import mongoose from "mongoose";
 
-// GET /api/articles - Get all articles
-export async function GET() {
+// GET /api/articles - Get all articles or user-specific articles
+export async function GET(req: Request) {
   try {
     await connectToDatabase();
-    const articles = await Article.find().sort({ createdAt: -1 });
+    
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get('userId');
+    const limit = searchParams.get('limit');
+    
+    let query = {};
+    if (userId) {
+      query = { authorId: userId };
+    }
+    
+    let articlesQuery = Article.find(query).sort({ createdAt: -1 });
+    
+    if (limit) {
+      articlesQuery = articlesQuery.limit(parseInt(limit));
+    }
+    
+    const articles = await articlesQuery.exec();
     return NextResponse.json(articles);
   } catch (error) {
     console.error("Failed to fetch articles:", error);

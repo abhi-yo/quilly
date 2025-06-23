@@ -3,10 +3,11 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
+import { User, Mail, Calendar, PenTool, Edit2, Save, X, BookOpen } from "lucide-react";
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
@@ -16,9 +17,11 @@ export default function ProfilePage() {
   const [newName, setNewName] = useState(session?.user?.name || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isWriter = session?.user?.role === "writer" || session?.user?.role === "admin";
+
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/auth/signup");
+      router.push("/auth/signin");
     }
     if (session?.user?.name && !isEditingName) {
       setNewName(session.user.name);
@@ -63,81 +66,139 @@ export default function ProfilePage() {
 
   if (status === "loading") {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-lg text-white">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full p-6">
-      <h1 className="text-3xl font-bold text-white mb-6">Profile</h1>
-      <div className="max-w-2xl">
-        <Card className="bg-[#1A1A1A] border-gray-700 text-white">
-          <CardHeader>
-            <CardTitle>User Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-1">
-              <label className="text-sm font-medium text-gray-400">Name</label>
-              {isEditingName ? (
-                <div className="flex items-center gap-2">
-                  <Input 
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Enter your name"
-                    className="bg-[#222] border-gray-600 text-white"
-                    disabled={isSubmitting}
-                  />
-                  <Button 
-                    onClick={handleSaveName}
-                    size="sm"
-                    disabled={isSubmitting || newName.trim() === (session?.user?.name || "")}
-                  >
-                    {isSubmitting ? "Saving..." : "Save"}
-                  </Button>
-                  <Button 
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                       setIsEditingName(false);
-                       setNewName(session?.user?.name || "");
-                    }}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-2xl mx-auto p-8">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold mb-3">Profile</h1>
+          <p className="text-gray-400 text-lg">
+            {isWriter 
+              ? "Manage your account and view your writing statistics" 
+              : "Manage your account and view your reading activity"
+            }
+          </p>
+        </div>
+
+        {/* Profile Information */}
+        <div className="space-y-6">
+            {/* Basic Info Card */}
+            <div className="bg-gray-950/50 backdrop-blur-sm border border-gray-900/50 rounded-2xl p-8">
+              <h2 className="text-2xl font-semibold text-white mb-6 flex items-center gap-2">
+                <User className="h-6 w-6 text-gray-400" />
+                Personal Information
+              </h2>
+
+              <div className="space-y-6">
+                {/* Name */}
+                <div>
+                  <label className="text-sm font-medium text-gray-400 mb-2 block">Full Name</label>
+                  {isEditingName ? (
+                    <div className="flex items-center gap-3">
+                      <Input 
+                        type="text"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        placeholder="Enter your name"
+                        className="bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 flex-1"
+                        disabled={isSubmitting}
+                      />
+                      <Button 
+                        onClick={handleSaveName}
+                        size="sm"
+                        disabled={isSubmitting || newName.trim() === (session?.user?.name || "")}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Save className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                           setIsEditingName(false);
+                           setNewName(session?.user?.name || "");
+                        }}
+                        disabled={isSubmitting}
+                        className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                           <span className="text-white font-semibold">
+                             {session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                           </span>
+                         </div>
+                         <div>
+                           <p className="text-xl font-medium text-white">{session?.user?.name || "Name not set"}</p>
+                           <p className="text-sm text-gray-400">
+                             {isWriter ? "Writer" : "Reader"}
+                           </p>
+                         </div>
+                       </div>
+                       <Button 
+                         variant="outline" 
+                         size="sm" 
+                         onClick={() => setIsEditingName(true)}
+                         className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                       >
+                         <Edit2 className="h-4 w-4 mr-1" />
+                         Edit
+                       </Button>
+                    </div>
+                  )}
                 </div>
-              ) : session?.user?.name ? (
-                <div className="flex items-center justify-between">
-                   <p className="text-lg">{session.user.name}</p>
-                   <Button variant="outline" size="sm" onClick={() => setIsEditingName(true)}>
-                     Edit
-                   </Button>
+
+                {/* Email */}
+                <div>
+                  <label className="text-sm font-medium text-gray-400 mb-2 block">Email Address</label>
+                  <div className="flex items-center gap-3 p-3 bg-gray-900/30 rounded-lg">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                    <span className="text-white">{session?.user?.email}</span>
+                  </div>
                 </div>
-              ) : (
-                 <Button 
-                   variant="secondary" 
-                   onClick={() => {
-                     setNewName("");
-                     setIsEditingName(true);
-                   }}
-                 >
-                   Add Name
-                 </Button>
-              )}
+
+                {/* Role */}
+                <div>
+                  <label className="text-sm font-medium text-gray-400 mb-2 block">Role</label>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="secondary" className="bg-gray-500/20 text-gray-300 border-gray-500/30">
+                      {isWriter ? (
+                        <PenTool className="h-3 w-3 mr-1" />
+                      ) : (
+                        <BookOpen className="h-3 w-3 mr-1" />
+                      )}
+                      {(session?.user?.role || "reader").charAt(0).toUpperCase() + (session?.user?.role || "reader").slice(1)}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Join Date */}
+                <div>
+                  <label className="text-sm font-medium text-gray-400 mb-2 block">Member Since</label>
+                  <div className="flex items-center gap-3 p-3 bg-gray-900/30 rounded-lg">
+                    <Calendar className="h-5 w-5 text-gray-400" />
+                    <span className="text-white">
+                      {new Date().toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric',
+                        year: 'numeric' 
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="grid gap-1">
-              <label className="text-sm font-medium text-gray-400">Email</label>
-              <p className="text-lg">{session?.user?.email}</p>
-            </div>
-            <div className="grid gap-1">
-              <label className="text-sm font-medium text-gray-400">Role</label>
-              <p className="text-lg capitalize">{session?.user?.role || "user"}</p>
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );

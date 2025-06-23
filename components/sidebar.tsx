@@ -2,161 +2,136 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { 
   HomeIcon, 
   CogIcon, 
   LayoutIcon,
   UserIcon,
-  LogInIcon,
-  UserPlusIcon,
   LogOutIcon,
   FileTextIcon,
+  PenToolIcon,
+  FingerprintIcon,
 } from "lucide-react";
+import {
+  Sidebar as SidebarContainer,
+  SidebarContent,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+  SidebarRail,
+} from "@/components/ui/sidebar";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   const handleSignOut = async () => {
     await signOut({ 
-      callbackUrl: '/auth/signup',
+      callbackUrl: '/auth/signin',
       redirect: true 
     });
   };
 
+  const isWriter = session?.user?.role === "writer" || session?.user?.role === "admin";
+
   const mainMenuItems = [
     {
       title: "Dashboard",
-      icon: <HomeIcon className="w-5 h-5" />,
+      icon: HomeIcon,
       href: "/dashboard",
+      showForRole: "all"
+    },
+    {
+      title: "Write",
+      icon: PenToolIcon,
+      href: "/write",
+      showForRole: "writer"
     },
     {
       title: "Articles",
-      icon: <FileTextIcon className="w-5 h-5" />,
+      icon: FileTextIcon,
       href: "/articles",
-    },
-    {
-      title: "Settings",
-      icon: <CogIcon className="w-5 h-5" />,
-      href: "/settings",
+      showForRole: "all"
     },
     {
       title: "Explore",
-      icon: <LayoutIcon className="w-5 h-5" />,
+      icon: LayoutIcon,
       href: "/explore",
+      showForRole: "all"
     },
-  ];
-
-  const accountItems = [
+    {
+      title: "Copyright",
+      icon: FingerprintIcon,
+      href: "/blockchain",
+      showForRole: "all"
+    },
     {
       title: "Profile",
-      icon: <UserIcon className="w-5 h-5" />,
+      icon: UserIcon,
       href: "/profile",
+      showForRole: "all"
     },
     {
-      title: "Sign In",
-      icon: <LogInIcon className="w-5 h-5" />,
-      href: "/auth/signin",
-    },
-    {
-      title: "Sign Up",
-      icon: <UserPlusIcon className="w-5 h-5" />,
-      href: "/auth/signup",
-    },
-    {
-      title: "Sign Out",
-      icon: <LogOutIcon className="w-5 h-5" />,
-      onClick: handleSignOut,
+      title: "Settings",
+      icon: CogIcon,
+      href: "/settings",
+      showForRole: "all"
     },
   ];
 
+  const filteredMenuItems = mainMenuItems.filter(item => 
+    item.showForRole === "all" || (item.showForRole === "writer" && isWriter)
+  );
+
   return (
-    <div className={cn("pb-12 min-h-screen bg-black", className)}>
-      <div className="space-y-4 py-4">
-        <div className="px-6 py-2">
-          <Link href="/" className="flex items-center">
-            <h2 className="text-2xl font-semibold text-white tracking-tight">
-              Stick&Dot.
-            </h2>
+    <SidebarContainer 
+      collapsible="offcanvas" 
+      className="w-64 h-screen bg-black border-r border-gray-900/50 flex flex-col"
+      style={{ backgroundColor: '#000000' }}
+    >
+      <SidebarHeader className="p-6 pb-4 bg-black">
+        <div className="flex items-center">
+          <Link href="/dashboard" className="flex items-center">
+            <h2 className="text-2xl font-bold text-white">Quilly</h2>
           </Link>
+          <SidebarTrigger className="text-gray-400 hover:text-white md:hidden ml-auto" />
         </div>
+      </SidebarHeader>
 
-        <div className="px-6 py-2">
-          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight text-gray-400">
-            MAIN MENU
-          </h2>
-          <ScrollArea className="px-1">
-            <div className="space-y-1">
-              {mainMenuItems.map((item) => (
-                <Button
-                  key={item.href}
-                  variant="ghost"
-                  asChild
-                  className={cn(
-                    "w-full justify-start text-gray-400 hover:text-white hover:bg-gray-900",
-                    pathname === item.href && "bg-gray-900 text-white"
-                  )}
-                >
-                  <Link href={item.href}>
-                    {item.icon}
-                    <span className="ml-3">{item.title}</span>
-                  </Link>
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
+      <SidebarContent className="flex-1 px-4 pt-2 bg-black">
+        <div className="space-y-1">
+          {filteredMenuItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <div
+                className={cn(
+                  "w-full flex items-center h-10 px-3 text-gray-400 hover:text-white hover:bg-gray-900/50 transition-all rounded-lg cursor-pointer",
+                  pathname === item.href && "bg-gray-900 text-white"
+                )}
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                <span className="ml-3 font-medium">{item.title}</span>
+              </div>
+            </Link>
+          ))}
         </div>
+      </SidebarContent>
 
-        <div className="px-6 py-2">
-          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight text-gray-400">
-            ACCOUNT PAGES
-          </h2>
-          <ScrollArea className="px-1">
-            <div className="space-y-1">
-              {accountItems.map((item) => (
-                <Button
-                  key={item.title}
-                  variant="ghost"
-                  {...(item.href
-                    ? {
-                        asChild: true,
-                        children: (
-                          <Link href={item.href}>
-                            {item.icon}
-                            <span className="ml-3">{item.title}</span>
-                          </Link>
-                        ),
-                      }
-                    : {
-                        onClick: item.onClick,
-                        children: (
-                          <>
-                            {item.icon}
-                            <span className="ml-3">{item.title}</span>
-                          </>
-                        ),
-                      }
-                  )}
-                  className={cn(
-                    "w-full justify-start text-gray-400 hover:text-white hover:bg-gray-900",
-                    pathname === item.href && "bg-gray-900 text-white"
-                  )}
-                />
-              ))}
-            </div>
-          </ScrollArea>
+      <SidebarFooter className="border-t border-gray-900/50 p-4 bg-black">
+        <div
+          onClick={handleSignOut}
+          className="w-full flex items-center h-10 px-3 text-gray-400 hover:text-white hover:bg-gray-900/50 transition-all rounded-lg cursor-pointer"
+        >
+          <LogOutIcon className="w-5 h-5" />
+          <span className="ml-3 font-medium">Sign Out</span>
         </div>
-      </div>
+      </SidebarFooter>
 
-      <div className="absolute bottom-4 left-0 right-0 px-6">
-        <div className="text-2xl font-bold text-white">Logo</div>
-      </div>
-    </div>
+      <SidebarRail />
+    </SidebarContainer>
   );
 } 

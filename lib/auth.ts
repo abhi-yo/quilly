@@ -17,17 +17,18 @@ export const authOptions: NextAuthOptions = {
         console.log("JWT Update triggered with session:", session);
         // Update token with the new session data
         token.name = session.user.name;
+        token.walletAddress = session.user.walletAddress;
         // Verify the update in database
         await connectToDatabase();
         const dbUser = await User.findOne({ email: token.email });
-        if (dbUser && dbUser.name !== token.name) {
+        if (dbUser && (dbUser.name !== token.name || dbUser.walletAddress !== token.walletAddress)) {
           // Update database if needed
           await User.updateOne(
             { email: token.email },
-            { $set: { name: token.name } }
+            { $set: { name: token.name, walletAddress: token.walletAddress } }
           );
         }
-        console.log("JWT token updated with name:", token.name);
+        console.log("JWT token updated with name:", token.name, "and walletAddress:", token.walletAddress);
         return token;
       }
 
@@ -49,11 +50,13 @@ export const authOptions: NextAuthOptions = {
           token.role = "user";
           token.id = newUser._id;
           token.name = user.name;
+          token.walletAddress = newUser.walletAddress;
         } else {
           console.log("[JWT Callback] Existing user found.");
           token.role = dbUser.role;
           token.id = dbUser._id;
           token.name = dbUser.name; // Sets token name from DATABASE record
+          token.walletAddress = dbUser.walletAddress;
           console.log("[JWT Callback] Token name set from DB User:", token.name);
         }
       }
@@ -65,9 +68,10 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.id = token.id as string;
         session.user.name = token.name;
+        session.user.walletAddress = token.walletAddress as string | undefined;
 
         // Log session update
-        console.log('Session updated with name:', session.user.name);
+        console.log('Session updated with name:', session.user.name, 'and walletAddress:', session.user.walletAddress);
       }
       return session;
     },
@@ -89,6 +93,7 @@ declare module "next-auth" {
   interface User {
     role: string;
     id: string;
+    walletAddress?: string;
   }
   
   interface Session {
@@ -98,6 +103,7 @@ declare module "next-auth" {
       email: string;
       name?: string | null;
       image?: string | null;
+      walletAddress?: string;
     }
   }
 
@@ -105,5 +111,6 @@ declare module "next-auth" {
     role: string;
     id: string;
     email?: string;
+    walletAddress?: string;
   }
 } 

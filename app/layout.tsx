@@ -1,15 +1,13 @@
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { Providers } from "./providers";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/toaster"
 import Script from "next/script";
 
-const inter = Inter({ subsets: ["latin"] });
-
 export const metadata = {
-  title: 'Content Platform',
-  description: 'A platform for content creators and consumers',
+  title: 'Blog',
+  description: 'A modern blogging platform for writers and readers',
 }
 
 export default function RootLayout({
@@ -19,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${GeistSans.className} antialiased bg-black text-white`}>
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <SidebarProvider>
           <Providers>{children}</Providers>

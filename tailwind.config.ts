@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,6 +9,10 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+		fontFamily: {
+			'open-sans': ['"Open Sans"', 'sans-serif'],
+			'tw-cen-mt': ['"TW Cen MT"', 'sans-serif'],
+		},
   		backgroundImage: {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
   			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'
@@ -96,33 +100,42 @@ const config: Config = {
         DEFAULT: {
           css: {
             maxWidth: '100%',
-            color: 'hsl(var(--foreground))',
+            color: '#ffffff',
             a: {
-              color: 'hsl(var(--primary))',
+              color: '#ffffff',
               '&:hover': {
-                color: 'hsl(var(--primary))',
+                color: '#e5e5e5',
               },
             },
             h1: {
-              color: 'hsl(var(--foreground))',
+              color: '#ffffff',
             },
             h2: {
-              color: 'hsl(var(--foreground))',
+              color: '#ffffff',
             },
             h3: {
-              color: 'hsl(var(--foreground))',
+              color: '#ffffff',
             },
             h4: {
-              color: 'hsl(var(--foreground))',
+              color: '#ffffff',
             },
             p: {
-              color: 'hsl(var(--foreground))',
+              color: '#d1d5db',
             },
             li: {
-              color: 'hsl(var(--foreground))',
+              color: '#d1d5db',
             },
             blockquote: {
-              color: 'hsl(var(--foreground))',
+              color: '#d1d5db',
+              borderLeftColor: '#374151',
+            },
+            code: {
+              color: '#ffffff',
+              backgroundColor: '#1f2937',
+            },
+            pre: {
+              backgroundColor: '#111827',
+              color: '#ffffff',
             },
           },
         },

@@ -1,41 +1,20 @@
-import NextAuth, { AuthOptions, User as NextAuthUser, Session as NextAuthSession, SessionStrategy } from "next-auth";
+import NextAuth, { AuthOptions, Session as NextAuthSession, User as NextAuthUser } from "next-auth";
 import { JWT as NextAuthJWT } from "next-auth/jwt";
-import { Adapter } from "next-auth/adapters";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import CredentialsProvider, { CredentialsConfig } from "next-auth/providers/credentials";
-import GoogleProvider, { GoogleProfile } from "next-auth/providers/google";
-import AppleProvider from "next-auth/providers/apple";
-import FacebookProvider from "next-auth/providers/facebook";
-import clientPromise from "@/lib/mongodb";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { compare, hash } from "bcryptjs";
+import clientPromise from "@/lib/mongodb";
+import { SessionStrategy } from "next-auth";
 
-declare module "next-auth" {
-  interface User {
-    id: string;
-    role: string;
-    name?: string | null;
-  }
-  interface Session {
-    user: {
-      id: string;
-      role: string;
-      email: string;
-      name?: string | null;
-      image?: string | null;
-    }
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    role: string;
-    name?: string | null;
-  }
+interface GoogleProfile {
+  sub: string;
+  name: string;
+  email: string;
+  picture: string;
 }
 
 export const authOptions: AuthOptions = {
-  adapter: MongoDBAdapter(clientPromise) as Adapter,
+  secret: process.env.NEXTAUTH_SECRET || "8f4a9b2c7e1d6f3a8b9c2e5f7a4d1b6e9c3f8a2b5d7e1c4f9a6b3e8d2c5f7a1b4e",
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -57,7 +36,6 @@ export const authOptions: AuthOptions = {
         const user = await db.collection("users").findOne({ email: credentials.email });
 
         if (!user && !credentials.otp) {
-          // First-time signup
           const hashedPassword = await hash(credentials.password, 12);
           const otp = Math.floor(100000 + Math.random() * 900000).toString();
           
@@ -73,7 +51,7 @@ export const authOptions: AuthOptions = {
             userId: newUser.insertedId,
             otp,
             createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
           });
 
           console.log("OTP for", credentials.email, ":", otp);
@@ -86,7 +64,6 @@ export const authOptions: AuthOptions = {
         }
 
         if (user && credentials.otp) {
-          // OTP verification
           const otpRecord = await db.collection("otps").findOne({
             userId: user._id,
             otp: credentials.otp,
@@ -134,42 +111,99 @@ export const authOptions: AuthOptions = {
       },
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_SECRET!,
-    }),
-    AppleProvider({
-      clientId: process.env.APPLE_ID!,
-      clientSecret: process.env.APPLE_SECRET!,
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_ID!,
-      clientSecret: process.env.FACEBOOK_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
   pages: {
-    signIn: "/auth/signup",
-    signOut: "/auth/signup",
+    signIn: "/auth/signin",
+    signOut: "/auth/signin",
     error: "/auth/error",
   },
   callbacks: {
-    async jwt({ token, user }: { token: NextAuthJWT; user?: NextAuthUser }) {
+    async signIn({ user, account, profile }) {
+      console.log("[SignIn Callback] Running...");
+      console.log("[SignIn Callback] User:", user);
+      console.log("[SignIn Callback] Account:", account);
+      
+      if (account?.provider === "google") {
+        try {
+          const client = await clientPromise;
+          const db = client.db();
+          
+          const existingUser = await db.collection("users").findOne({ email: user.email });
+          
+          if (!existingUser) {
+            const result = await db.collection("users").insertOne({
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              role: "pending",
+              emailVerified: new Date(),
+              createdAt: new Date(),
+              provider: "google",
+              googleId: user.id,
+              needsRoleSelection: true,
+            });
+            user.id = result.insertedId.toString();
+            user.role = "pending";
+            console.log("[SignIn Callback] Created new Google user - needs role selection");
+            return "/auth/complete-profile?provider=google";
+          } else {
+            await db.collection("users").updateOne(
+              { email: user.email },
+              { 
+                $set: { 
+                  name: user.name || existingUser.name,
+                  image: user.image || existingUser.image,
+                  emailVerified: existingUser.emailVerified || new Date(),
+                  googleId: user.id,
+                }
+              }
+            );
+            user.id = existingUser._id.toString();
+            user.role = existingUser.role || "reader";
+            console.log("[SignIn Callback] Updated existing user with Google info");
+          }
+        } catch (error) {
+          console.error("[SignIn Callback] Error handling Google user:", error);
+          return false;
+        }
+      }
+      
+      return true;
+    },
+    async jwt({ token, user }) {
       console.log("[JWT Callback] Running...");
       console.log("[JWT Callback] Input User:", user);
       console.log("[JWT Callback] Input Token:", token);
+      
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role || "reader";
         token.name = user.name;
         console.log("[JWT Callback] Token updated with user info.");
+      } else if (token.role === "pending") {
+        try {
+          const client = await clientPromise;
+          const db = client.db();
+          const dbUser = await db.collection("users").findOne({ email: token.email });
+          if (dbUser && dbUser.role !== "pending") {
+            token.role = dbUser.role;
+            console.log("[JWT Callback] Updated pending role to:", dbUser.role);
+          }
+        } catch (error) {
+          console.error("[JWT Callback] Error checking role update:", error);
+        }
       }
       console.log("[JWT Callback] Returning Token:", token);
       return token;
     },
-    async session({ session, token }: { session: NextAuthSession; token: NextAuthJWT }) {
+    async session({ session, token }) {
       console.log("[Session Callback] Running...");
       console.log("[Session Callback] Input Token:", token);
       console.log("[Session Callback] Input Session:", session);
-      if (session.user && token) { // Check token exists
+      if (session.user && token) {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.name = token.name;
@@ -181,7 +215,7 @@ export const authOptions: AuthOptions = {
   },
   session: {
     strategy: "jwt" as SessionStrategy,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 7 * 24 * 60 * 60,
   },
 };
 

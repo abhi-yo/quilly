@@ -7,25 +7,27 @@ import { connectToDatabase } from "@/lib/db"; // Import DB connector
 import { Payment } from "@/models/Payment"; // Import Payment model
 import mongoose from 'mongoose'; // Import mongoose
 
-// Ensure environment variables are loaded and non-null
-const keyId = process.env.RZP_KEYID;
-const keySecret = process.env.RZP_KEYSECRET;
-
-if (!keyId || !keySecret) {
-  console.error("Razorpay API keys are not defined in environment variables.");
-  // Optionally throw an error during startup if keys are critical
-}
-
-const razorpay = new Razorpay({
-  key_id: keyId!,
-  key_secret: keySecret!,
-});
-
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) { // Check for user ID from session
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const keyId = process.env.RZP_KEYID;
+  const keySecret = process.env.RZP_KEYSECRET;
+
+  if (!keyId || !keySecret) {
+    console.error("Razorpay API keys are not defined in environment variables.");
+    return NextResponse.json(
+      { error: "Payment service not configured" },
+      { status: 500 }
+    );
+  }
+
+  const razorpay = new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret,
+  });
 
   try {
     const amount = 1000;

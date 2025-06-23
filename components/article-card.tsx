@@ -1,52 +1,106 @@
 "use client";
 
-import Image from "next/image";
-import { Clock } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Clock, User, Eye, MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 interface ArticleCardProps {
-  article: {
-    title: string;
-    author: string;
-    readTime: string;
-  };
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  createdAt: string;
+  tags?: string[];
+  views?: number;
+  comments?: number;
 }
 
-export function ArticleCard({ article }: ArticleCardProps) {
+export default function ArticleCard({
+  id,
+  title,
+  content,
+  author,
+  createdAt,
+  tags = [],
+  views = 0,
+  comments = 0,
+}: ArticleCardProps) {
+  const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const excerpt = content.length > 200 ? content.substring(0, 200) + "..." : content;
+
   return (
-    <Card className="w-full h-full rounded-[5.31px] p-0 border-none">
-      <CardContent className="p-0 h-full">
-        <div className="relative w-full h-full aspect-square bg-[#d9d9d9] rounded-[2.66px] bg-cover bg-center overflow-hidden">
-          {/* Background image or gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-          
-          {/* Title */}
-          <div className="absolute top-1/2 left-[10%] transform -translate-y-1/2 font-extrabold text-[2.5rem] leading-tight tracking-wide text-[#353535]">
-            {article.title}
+    <Card className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-all duration-200 hover:shadow-lg">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-4">
+          <CardTitle className="text-white text-xl font-semibold line-clamp-2 hover:text-gray-200 transition-colors">
+            <Link href={`/articles/${id}`}>{title}</Link>
+          </CardTitle>
+        </div>
+        
+        <CardDescription className="flex items-center gap-3 text-gray-400 text-sm">
+          <div className="flex items-center gap-1">
+            <User className="h-3 w-3" />
+            <span>{author}</span>
           </div>
-          
-          {/* Author section */}
-          <div className="absolute bottom-4 left-4 flex items-center gap-3">
-            <Avatar className="w-8 h-8 bg-white">
-              <AvatarFallback>{article.author?.charAt(0).toUpperCase() || "A"}</AvatarFallback>
-            </Avatar>
-            <span className="font-normal text-[#fefefe99] text-sm tracking-wider whitespace-nowrap">
-              {article.author.toUpperCase()}
-            </span>
+          <div className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            <span>{formattedDate}</span>
           </div>
-          
-          {/* Read time */}
-          <div className="absolute top-4 right-4">
-            <div className="relative px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-lg border border-solid border-[#d9d9d9] shadow">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-white/90" />
-                <span className="text-sm text-white/90 tracking-wider">
-                  {article.readTime} mins read
-                </span>
-              </div>
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="pt-0">
+        <p className="text-gray-300 line-clamp-4 mb-4 leading-relaxed">
+          {excerpt}
+        </p>
+
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {tags.slice(0, 3).map((tag, index) => (
+              <Badge 
+                key={index} 
+                variant="secondary" 
+                className="bg-gray-800 text-gray-300 hover:bg-gray-700 text-xs"
+              >
+                #{tag}
+              </Badge>
+            ))}
+            {tags.length > 3 && (
+              <Badge variant="outline" className="border-gray-700 text-gray-400 text-xs">
+                +{tags.length - 3} more
+              </Badge>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-gray-400 text-sm">
+            <div className="flex items-center gap-1">
+              <Eye className="h-3 w-3" />
+              <span>{views}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <MessageCircle className="h-3 w-3" />
+              <span>{comments}</span>
             </div>
           </div>
+
+          <Link href={`/articles/${id}`}>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-gray-700 text-white hover:bg-gray-800 hover:border-gray-600"
+            >
+              Read More
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

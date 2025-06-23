@@ -13,11 +13,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, role, name, mobile, domain, gender, dob } = await req.json();
+    const body = await req.json();
+    const { email, role, name, mobile, domain, gender, dob } = body;
 
-    if (!email || !role || !name || !mobile || !domain || !gender || !dob) {
+    if (!email || !role) {
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: "Email and role are required" },
         { status: 400 }
       );
     }
@@ -25,32 +26,50 @@ export async function POST(req: Request) {
     const client = await clientPromise;
     const db = client.db();
 
-    // Update user profile in MongoDB
-    const result = await db.collection("users").updateOne(
-      { email: email },
-      {
-        $set: {
-          name,
-          role,
-          profile: {
-            mobile,
-            domain,
-            gender,
-            dateOfBirth: new Date(dob),
+    if (name && mobile && domain && gender && dob) {
+      const result = await db.collection("users").updateOne(
+        { email: email },
+        {
+          $set: {
+            name,
+            role,
+            profile: {
+              mobile,
+              domain,
+              gender,
+              dateOfBirth: new Date(dob),
+              updatedAt: new Date()
+            },
             updatedAt: new Date()
-          },
-          updatedAt: new Date()
-        }
-      },
-      { upsert: true }
-    );
+          }
+        },
+        { upsert: true }
+      );
 
-    if (result.acknowledged) {
-      // Fetch the updated user data
-      const updatedUser = await db.collection("users").findOne({ email: email });
-      return NextResponse.json(updatedUser);
+      if (result.acknowledged) {
+        const updatedUser = await db.collection("users").findOne({ email: email });
+        return NextResponse.json(updatedUser);
+      } else {
+        throw new Error("Failed to update user profile");
+      }
     } else {
-      throw new Error("Failed to update user profile");
+      const result = await db.collection("users").updateOne(
+        { email: email },
+        {
+          $set: {
+            role,
+            needsRoleSelection: false,
+            updatedAt: new Date()
+          }
+        }
+      );
+
+      if (result.acknowledged) {
+        const updatedUser = await db.collection("users").findOne({ email: email });
+        return NextResponse.json({ success: true, user: updatedUser });
+      } else {
+        throw new Error("Failed to update user role");
+      }
     }
 
   } catch (error) {
