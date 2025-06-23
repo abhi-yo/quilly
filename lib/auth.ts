@@ -15,49 +15,62 @@ export const authOptions: NextAuthOptions = {
       // Handle the update case
       if (trigger === "update" && session?.user) {
         console.log("JWT Update triggered with session:", session);
-        // Update token with the new session data
         token.name = session.user.name;
         token.walletAddress = session.user.walletAddress;
-        // Verify the update in database
-        await connectToDatabase();
-        const dbUser = await User.findOne({ email: token.email });
-        if (dbUser && (dbUser.name !== token.name || dbUser.walletAddress !== token.walletAddress)) {
-          // Update database if needed
-          await User.updateOne(
-            { email: token.email },
-            { $set: { name: token.name, walletAddress: token.walletAddress } }
-          );
+        
+        try {
+          await connectToDatabase();
+          const dbUser = await User.findOne({ email: token.email });
+          if (dbUser && (dbUser.name !== token.name || dbUser.walletAddress !== token.walletAddress)) {
+            await User.updateOne(
+              { email: token.email },
+              { $set: { name: token.name, walletAddress: token.walletAddress } }
+            );
+          }
+          console.log("JWT token updated with name:", token.name, "and walletAddress:", token.walletAddress);
+        } catch (error) {
+          console.error("Error updating user in database:", error);
         }
-        console.log("JWT token updated with name:", token.name, "and walletAddress:", token.walletAddress);
         return token;
       }
 
       if (account && user) {
         console.log("[JWT Callback] Initial sign-in triggered.");
         console.log("[JWT Callback] Provider User:", user);
-        await connectToDatabase();
-        const dbUser = await User.findOne({ email: user.email });
-        console.log("[JWT Callback] DB User found:", dbUser);
         
-        if (!dbUser) {
-          console.log("[JWT Callback] Creating new user.");
-          const newUser = await User.create({
-            email: user.email,
-            name: user.name,
-            role: "user", // Default role
-          });
-          console.log("[JWT Callback] New user created:", newUser);
+        try {
+          await connectToDatabase();
+          const dbUser = await User.findOne({ email: user.email });
+          console.log("[JWT Callback] DB User found:", dbUser);
+          
+          if (!dbUser) {
+            console.log("[JWT Callback] Creating new user.");
+            const newUser = await User.create({
+              email: user.email,
+              name: user.name,
+              role: "user",
+            });
+            console.log("[JWT Callback] New user created:", newUser);
+            token.role = "user";
+            token.id = newUser._id.toString();
+            token.name = user.name;
+            token.walletAddress = newUser.walletAddress;
+          } else {
+            console.log("[JWT Callback] Existing user found.");
+            token.role = dbUser.role;
+            token.id = dbUser._id.toString();
+            token.name = dbUser.name;
+            token.walletAddress = dbUser.walletAddress;
+            console.log("[JWT Callback] Token name set from DB User:", token.name);
+          }
+        } catch (error) {
+          console.error("[JWT Callback] Database error:", error);
+          // Fallback to basic user data if database fails
           token.role = "user";
-          token.id = newUser._id;
+          token.id = user.id;
           token.name = user.name;
-          token.walletAddress = newUser.walletAddress;
-        } else {
-          console.log("[JWT Callback] Existing user found.");
-          token.role = dbUser.role;
-          token.id = dbUser._id;
-          token.name = dbUser.name; // Sets token name from DATABASE record
-          token.walletAddress = dbUser.walletAddress;
-          console.log("[JWT Callback] Token name set from DB User:", token.name);
+          token.email = user.email;
+          console.log("[JWT Callback] Using fallback user data due to DB error");
         }
       }
       console.log("[JWT Callback] Returning token:", token);
@@ -65,12 +78,11 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session?.user) {
-        session.user.role = token.role as string;
+        session.user.role = token.role as string || "user";
         session.user.id = token.id as string;
         session.user.name = token.name;
         session.user.walletAddress = token.walletAddress as string | undefined;
 
-        // Log session update
         console.log('Session updated with name:', session.user.name, 'and walletAddress:', session.user.walletAddress);
       }
       return session;
@@ -78,17 +90,17 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
-    signOut: "/auth/signup",
+    signOut: "/auth/signup", 
     error: "/auth/error",
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
+    maxAge: 30 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
+  debug: process.env.NODE_ENV === "development",
 };
 
-// Extend next-auth types to include role
 declare module "next-auth" {
   interface User {
     role: string;
