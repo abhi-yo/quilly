@@ -49,18 +49,21 @@ export const authOptions: NextAuthOptions = {
               email: user.email,
               name: user.name,
               role: "reader",
+              needsRoleSelection: true,
             });
             console.log("[JWT Callback] New user created:", newUser);
             token.role = "reader";
             token.id = newUser._id.toString();
             token.name = user.name;
             token.walletAddress = newUser.walletAddress;
+            token.needsRoleSelection = true;
           } else {
             console.log("[JWT Callback] Existing user found.");
             token.role = dbUser.role;
             token.id = dbUser._id.toString();
             token.name = dbUser.name;
             token.walletAddress = dbUser.walletAddress;
+            token.needsRoleSelection = dbUser.needsRoleSelection || false;
             console.log("[JWT Callback] Token name set from DB User:", token.name);
           }
         } catch (error) {
@@ -70,6 +73,7 @@ export const authOptions: NextAuthOptions = {
           token.id = user.id;
           token.name = user.name;
           token.email = user.email;
+          token.needsRoleSelection = false;
           console.log("[JWT Callback] Using fallback user data due to DB error");
         }
       }
@@ -82,10 +86,14 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.name = token.name;
         session.user.walletAddress = token.walletAddress as string | undefined;
+        session.user.needsRoleSelection = token.needsRoleSelection as boolean || false;
 
         console.log('Session updated with name:', session.user.name, 'and walletAddress:', session.user.walletAddress);
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      return url.startsWith(baseUrl) ? url : baseUrl;
     },
   },
   pages: {
@@ -106,6 +114,7 @@ declare module "next-auth" {
     role: string;
     id: string;
     walletAddress?: string;
+    needsRoleSelection?: boolean;
   }
   
   interface Session {
@@ -116,6 +125,7 @@ declare module "next-auth" {
       name?: string | null;
       image?: string | null;
       walletAddress?: string;
+      needsRoleSelection?: boolean;
     }
   }
 
@@ -124,5 +134,6 @@ declare module "next-auth" {
     id: string;
     email?: string;
     walletAddress?: string;
+    needsRoleSelection?: boolean;
   }
 } 

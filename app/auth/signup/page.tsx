@@ -179,7 +179,7 @@ export default function SignUp() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/dashboard" });
+    signIn("google", { callbackUrl: "/auth/complete-profile?provider=google" });
   };
 
   if (step === 'verify') {

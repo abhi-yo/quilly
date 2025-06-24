@@ -5,6 +5,7 @@ export interface IUser {
   name?: string;
   role: string;
   createdAt: Date;
+  needsRoleSelection?: boolean;
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -24,6 +25,10 @@ const userSchema = new mongoose.Schema<IUser>({
     required: true,
     enum: ['reader', 'writer', 'admin'],
     default: 'reader',
+  },
+  needsRoleSelection: {
+    type: Boolean,
+    default: false,
   },
   createdAt: {
     type: Date,
