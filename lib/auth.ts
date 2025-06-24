@@ -12,19 +12,27 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account, trigger, session }) {
-      // Handle the update case
       if (trigger === "update" && session?.user) {
         console.log("JWT Update triggered with session:", session);
         token.name = session.user.name;
+        token.role = session.user.role;
+        token.needsRoleSelection = session.user.needsRoleSelection;
         token.walletAddress = session.user.walletAddress;
         
         try {
           await connectToDatabase();
           const dbUser = await User.findOne({ email: token.email });
-          if (dbUser && (dbUser.name !== token.name || dbUser.walletAddress !== token.walletAddress)) {
+          if (dbUser) {
             await User.updateOne(
               { email: token.email },
-              { $set: { name: token.name, walletAddress: token.walletAddress } }
+              { 
+                $set: { 
+                  name: token.name, 
+                  role: token.role,
+                  needsRoleSelection: token.needsRoleSelection,
+                  walletAddress: token.walletAddress 
+                } 
+              }
             );
           }
           console.log("JWT token updated with name:", token.name, "and walletAddress:", token.walletAddress);
@@ -68,13 +76,26 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error("[JWT Callback] Database error:", error);
-          // Fallback to basic user data if database fails
           token.role = "reader";
           token.id = user.id;
           token.name = user.name;
           token.email = user.email;
           token.needsRoleSelection = false;
           console.log("[JWT Callback] Using fallback user data due to DB error");
+        }
+      } else if (token.email) {
+        try {
+          await connectToDatabase();
+          const dbUser = await User.findOne({ email: token.email });
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.needsRoleSelection = dbUser.needsRoleSelection || false;
+            token.name = dbUser.name;
+            token.walletAddress = dbUser.walletAddress;
+            console.log("[JWT Callback] Updated token from database:", { role: token.role, needsRoleSelection: token.needsRoleSelection });
+          }
+        } catch (error) {
+          console.error("[JWT Callback] Error fetching user from database:", error);
         }
       }
       console.log("[JWT Callback] Returning token:", token);

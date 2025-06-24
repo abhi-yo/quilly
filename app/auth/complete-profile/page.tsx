@@ -69,10 +69,7 @@ export default function CompleteProfile() {
 
       if (response.ok) {
         await update({ role: selectedRole, needsRoleSelection: false });
-        
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 500);
+        router.push("/dashboard");
       } else {
         console.error("Failed to update role:", data);
         alert("Failed to update role. Please try again.");
