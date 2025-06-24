@@ -48,10 +48,10 @@ export const authOptions: NextAuthOptions = {
             const newUser = await User.create({
               email: user.email,
               name: user.name,
-              role: "user",
+              role: "reader",
             });
             console.log("[JWT Callback] New user created:", newUser);
-            token.role = "user";
+            token.role = "reader";
             token.id = newUser._id.toString();
             token.name = user.name;
             token.walletAddress = newUser.walletAddress;
@@ -66,7 +66,7 @@ export const authOptions: NextAuthOptions = {
         } catch (error) {
           console.error("[JWT Callback] Database error:", error);
           // Fallback to basic user data if database fails
-          token.role = "user";
+          token.role = "reader";
           token.id = user.id;
           token.name = user.name;
           token.email = user.email;
@@ -78,7 +78,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session?.user) {
-        session.user.role = token.role as string || "user";
+        session.user.role = token.role as string || "reader";
         session.user.id = token.id as string;
         session.user.name = token.name;
         session.user.walletAddress = token.walletAddress as string | undefined;

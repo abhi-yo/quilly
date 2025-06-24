@@ -241,7 +241,7 @@ export default function SettingsPage() {
                 <label className="text-sm font-medium text-gray-400 mb-2 block">Account Type</label>
                 <div className="flex items-center gap-3 p-3 bg-gray-900/30 rounded-lg">
                   <Shield className="h-5 w-5 text-gray-400" />
-                  <span className="text-white capitalize">{session?.user?.role || "user"}</span>
+                  <span className="text-white capitalize">{session?.user?.role || "reader"}</span>
                 </div>
               </div>
             </div>
