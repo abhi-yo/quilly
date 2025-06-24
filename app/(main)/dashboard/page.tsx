@@ -12,23 +12,13 @@ export default function DashboardPage() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signup");
-    } else if (status === "authenticated" && session?.user?.needsRoleSelection) {
-      router.push("/auth/complete-profile?provider=google");
     }
-  }, [status, session, router]);
+  }, [status, router]);
 
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  if (session?.user?.needsRoleSelection) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Redirecting...</div>
       </div>
     );
   }

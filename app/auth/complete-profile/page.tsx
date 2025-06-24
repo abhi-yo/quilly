@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,6 @@ export default function CompleteProfile() {
   const { data: session, status, update } = useSession();
   const provider = searchParams.get("provider");
 
-  useEffect(() => {
-    if (status === "authenticated" && session?.user && !session.user.needsRoleSelection) {
-      router.push("/dashboard");
-    }
-  }, [status, session, router]);
-
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -32,14 +26,6 @@ export default function CompleteProfile() {
   if (status === "unauthenticated") {
     router.push("/auth/signin");
     return null;
-  }
-
-  if (session?.user && !session.user.needsRoleSelection) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Redirecting to dashboard...</div>
-      </div>
-    );
   }
 
   const handleRoleSubmit = async () => {
@@ -68,7 +54,7 @@ export default function CompleteProfile() {
       const data = await response.json();
 
       if (response.ok) {
-        await update({ role: selectedRole, needsRoleSelection: false });
+        await update({ role: selectedRole });
         router.push("/dashboard");
       } else {
         console.error("Failed to update role:", data);
@@ -137,13 +123,23 @@ export default function CompleteProfile() {
             </div>
           </div>
 
-          <Button
-            onClick={handleRoleSubmit}
-            disabled={!selectedRole || isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Setting up..." : "Continue"}
-          </Button>
+          <div className="space-y-3">
+            <Button
+              onClick={handleRoleSubmit}
+              disabled={!selectedRole || isLoading}
+              className="w-full"
+            >
+              {isLoading ? "Setting up..." : "Continue"}
+            </Button>
+            
+            <Button
+              onClick={() => router.push("/dashboard")}
+              variant="outline"
+              className="w-full"
+            >
+              Skip for now
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
