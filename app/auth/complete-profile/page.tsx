@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,12 @@ export default function CompleteProfile() {
   const { data: session, status, update } = useSession();
   const provider = searchParams.get("provider");
 
+  useEffect(() => {
+    if (status === "authenticated" && session?.user && !session.user.needsRoleSelection) {
+      router.push("/dashboard");
+    }
+  }, [status, session, router]);
+
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -26,6 +32,14 @@ export default function CompleteProfile() {
   if (status === "unauthenticated") {
     router.push("/auth/signin");
     return null;
+  }
+
+  if (session?.user && !session.user.needsRoleSelection) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Redirecting to dashboard...</div>
+      </div>
+    );
   }
 
   const handleRoleSubmit = async () => {
@@ -54,8 +68,11 @@ export default function CompleteProfile() {
       const data = await response.json();
 
       if (response.ok) {
-        await update({ role: selectedRole });
-        router.push("/dashboard");
+        await update({ role: selectedRole, needsRoleSelection: false });
+        
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 500);
       } else {
         console.error("Failed to update role:", data);
         alert("Failed to update role. Please try again.");
