@@ -1,152 +1,210 @@
-# 🚀 Quilly Blockchain Features
+# 🚀 Quilly Blockchain Integration
 
-This document outlines the Web3 blockchain features implemented in Quilly, including token-based tipping, copyright protection, and DAO governance.
+This document outlines the Web3 blockchain features integrated into the Quilly content platform, including token-based tipping, copyright protection, and DAO governance.
 
-## 🎯 Features Overview
+## 🎯 Current Implementation Status
 
-### 1. 🪙 Token-Based Tipping
+### ✅ Implemented Features
+
 - **QUILL Token (ERC-20)**: Native platform token for tipping
-- **Faucet System**: Users can claim 100 QUILL tokens every 24 hours
-- **Direct Tipping**: Send tokens directly to writers' wallets
-- **Transparent Transactions**: All tips recorded on blockchain
+- **Wallet Connection**: MetaMask integration with Polygon Amoy testnet
+- **Token Faucet**: Users can claim 100 QUILL tokens every 24 hours
+- **Tipping System**: Send tokens to writers with transaction recording
+- **Frontend Components**: Complete UI for wallet connection and tipping
 
-### 2. 🛡️ Copyright Protection
-- **Content Registration**: Register articles on blockchain for copyright protection
-- **Hash-based Verification**: Uses SHA-256 hashing for content integrity
-- **Plagiarism Detection**: Check if content is already registered by someone else
-- **Immutable Proof**: Blockchain timestamp provides legal proof of creation
+### 🚧 Planned Features
 
-### 3. 🏛️ DAO Governance
-- **Community Proposals**: Token holders can create governance proposals
-- **Weighted Voting**: Voting power proportional to token holdings
-- **Category System**: Proposals categorized (Feature, Policy, Economics, etc.)
-- **Transparent Process**: All votes and proposals stored on-chain
+- **Copyright Protection**: Register articles on blockchain
+- **DAO Governance**: Community proposals and voting
+- **NFT Integration**: Mint articles as NFTs
 
-## 🔧 Technical Implementation
+## 🔧 Technical Architecture
 
-### Smart Contracts
+### Smart Contracts (Polygon Amoy Testnet)
 
 #### QuillyToken.sol
+
 ```solidity
-- ERC-20 compliant token
-- Built-in faucet mechanism
-- Tipping functionality
-- 1,000,000 total supply
+contract QuillyToken is IERC20 {
+    // ERC-20 compliant token
+    // Built-in faucet mechanism (100 QUILL per claim)
+    // Tipping functionality with event logging
+    // 1,000,000 total supply
+    // 24-hour faucet cooldown
+}
 ```
 
-#### CopyrightProtection.sol
+#### CopyrightProtection.sol (Planned)
+
 ```solidity
-- Content hash registration
-- Ownership verification
-- Plagiarism detection
-- IPFS integration ready
+contract CopyrightProtection {
+    // Content hash registration
+    // Ownership verification
+    // Plagiarism detection
+    // IPFS integration
+}
 ```
 
-#### DAOGovernance.sol
+#### DAOGovernance.sol (Planned)
+
 ```solidity
-- Proposal creation (1000 QUILL minimum)
-- Token-weighted voting
-- 7-day voting periods
-- Automatic execution logic
+contract DAOGovernance {
+    // Proposal creation (1000 QUILL minimum)
+    // Token-weighted voting
+    // 7-day voting periods
+    // Automatic execution logic
+}
 ```
 
-### Frontend Components
+### Frontend Integration
 
-- **WalletConnect**: MetaMask integration
-- **TipWriter**: Tipping interface
-- **CopyrightProtection**: Content registration
-- **DAOGovernance**: Proposal and voting system
+Located in `/components/blockchain/`:
 
-## 🚀 Getting Started
+- **WalletConnect.tsx**: MetaMask connection and balance display
+- **TipWriter.tsx**: Token tipping interface for articles
+- **CopyrightProtection.tsx**: Content registration (planned)
+- **DAOGovernance.tsx**: Proposal and voting system (planned)
 
-### Prerequisites
-- MetaMask wallet installed
-- Polygon Mumbai testnet configured
-- Test MATIC for gas fees
+### Web3 Service Layer
 
-### Setup
+`/lib/web3.ts` provides:
 
-1. **Install Dependencies**
-   ```bash
-   pnpm install
-   ```
+- Wallet connection management
+- Smart contract interaction
+- Network switching (Polygon Amoy)
+- Demo mode for development
+- Transaction handling
 
-2. **Configure Environment**
-   ```bash
-   # Add to .env.local
-   NEXT_PUBLIC_QUILLY_TOKEN_ADDRESS=your_token_address
-   NEXT_PUBLIC_COPYRIGHT_PROTECTION_ADDRESS=your_copyright_address
-   NEXT_PUBLIC_DAO_GOVERNANCE_ADDRESS=your_dao_address
-   ```
+## 🌐 Network Configuration
 
-3. **Deploy Contracts** (Development)
-   ```bash
-   npx hardhat compile
-   npx hardhat run scripts/deploy.js --network polygonMumbai
-   ```
+### Polygon Amoy Testnet
 
-### Usage
-
-1. **Connect Wallet**
-   - Visit `/blockchain` page
-   - Click "Connect MetaMask"
-   - Switch to Polygon Mumbai network
-
-2. **Claim Tokens**
-   - Click "Claim 100 QUILL" button
-   - Confirm transaction in MetaMask
-   - Wait for confirmation
-
-3. **Tip Writers**
-   - Select tip amount
-   - Click "Tip" button
-   - Confirm transaction
-
-4. **Register Copyright**
-   - Enter article content
-   - Click "Register Copyright"
-   - Pay registration fee (~0.001 MATIC)
-
-5. **Participate in DAO**
-   - Create proposals (requires 1000 QUILL)
-   - Vote on active proposals
-   - View voting results
-
-## 🔗 Network Configuration
-
-### Polygon Mumbai Testnet
 ```javascript
 {
-  chainId: '0x13881',
-  chainName: 'Mumbai',
+  chainId: '0x13882', // Updated to Amoy testnet
+  chainName: 'Polygon Amoy Testnet',
   nativeCurrency: {
     name: 'MATIC',
     symbol: 'MATIC',
     decimals: 18,
   },
-  rpcUrls: ['https://rpc-mumbai.maticvigil.com/'],
-  blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
+  rpcUrls: ['https://rpc-amoy.polygon.technology/'],
+  blockExplorerUrls: ['https://amoy.polygonscan.com/'],
 }
 ```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- MetaMask wallet installed
+- Polygon Amoy testnet configured
+- Test MATIC for gas fees (get from [Polygon Faucet](https://faucet.polygon.technology/))
+
+### Environment Variables
+
+```bash
+# Blockchain configuration
+POLYGON_AMOY_RPC=https://rpc-amoy.polygon.technology/
+PRIVATE_KEY=your_deployment_private_key
+
+# Contract addresses (set after deployment)
+NEXT_PUBLIC_QUILLY_TOKEN_ADDRESS=deployed_token_address
+NEXT_PUBLIC_COPYRIGHT_PROTECTION_ADDRESS=deployed_copyright_address
+NEXT_PUBLIC_DAO_GOVERNANCE_ADDRESS=deployed_dao_address
+```
+
+### Smart Contract Deployment
+
+1. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+2. **Compile Contracts**
+
+   ```bash
+   npx hardhat compile
+   ```
+
+3. **Deploy to Amoy Testnet**
+
+   ```bash
+   npx hardhat run scripts/deploy.js --network polygonAmoy
+   ```
+
+4. **Verify Contracts**
+   ```bash
+   npx hardhat verify --network polygonAmoy CONTRACT_ADDRESS
+   ```
+
+## 💡 How to Use Blockchain Features
+
+### 1. Connect Wallet
+
+- Visit any article page or `/blockchain`
+- Click "Connect MetaMask"
+- Approve network switch to Polygon Amoy
+- Wallet address and balance displayed
+
+### 2. Claim QUILL Tokens
+
+```javascript
+// Automatic faucet integration
+const claimTokens = async () => {
+  await web3Service.claimFaucet();
+  // User receives 100 QUILL tokens
+  // 24-hour cooldown applies
+};
+```
+
+### 3. Tip Writers
+
+```javascript
+// Tip functionality on article pages
+const tipWriter = async (amount, articleId) => {
+  await web3Service.tipWriter(writerAddress, amount, articleId);
+  // Transaction recorded on blockchain
+  // Writer receives tokens
+};
+```
+
+### 4. Article Integration
+
+- Each article page includes TipWriter component
+- Writer wallet addresses linked to user profiles
+- Transaction history tracked in database
+- Real-time balance updates
 
 ## 📊 Token Economics
 
 - **Total Supply**: 1,000,000 QUILL
 - **Faucet Amount**: 100 QUILL per claim
 - **Faucet Cooldown**: 24 hours
-- **Proposal Threshold**: 1,000 QUILL
-- **Voting Minimum**: 100 QUILL
+- **Gas Fees**: Paid in MATIC
+- **Tipping**: Direct writer-to-writer transfers
 
 ## 🔒 Security Features
 
-- **Reentrancy Protection**: Smart contracts use checks-effects-interactions
-- **Access Control**: Role-based permissions
-- **Input Validation**: Comprehensive parameter checking
-- **Gas Optimization**: Efficient contract design
+### Smart Contract Security
 
-## 🛠️ Development
+- Reentrancy protection using checks-effects-interactions
+- Access control with owner modifiers
+- Input validation for all functions
+- Event emission for transparency
+
+### Frontend Security
+
+- Wallet connection validation
+- Transaction confirmation dialogs
+- Error handling for failed transactions
+- Demo mode for testing without real tokens
+
+## 🛠️ Development Workflow
 
 ### Local Testing
+
 ```bash
 # Start local hardhat node
 npx hardhat node
@@ -154,37 +212,88 @@ npx hardhat node
 # Deploy to local network
 npx hardhat run scripts/deploy.js --network localhost
 
-# Run tests
+# Run contract tests
 npx hardhat test
 ```
 
-### Contract Verification
-```bash
-npx hardhat verify --network polygonMumbai CONTRACT_ADDRESS
+### Integration Testing
+
+- Demo mode automatically enabled when contracts not deployed
+- Simulated transactions for UI testing
+- Mock data for development environment
+
+## 🎯 Roadmap
+
+### Phase 1: Current (Tipping System) ✅
+
+- QUILL token deployment
+- MetaMask integration
+- Basic tipping functionality
+- Frontend components
+
+### Phase 2: Content Protection 🚧
+
+- Copyright registration smart contract
+- Content hash verification
+- Plagiarism detection
+- IPFS integration for content storage
+
+### Phase 3: DAO Governance 🚧
+
+- Governance token mechanics
+- Proposal creation and voting
+- Treasury management
+- Community decision making
+
+### Phase 4: Advanced Features 📋
+
+- Multi-token support
+- NFT article minting
+- Cross-chain compatibility
+- Advanced analytics
+
+## 🔧 Configuration
+
+### Hardhat Configuration
+
+```javascript
+// hardhat.config.js
+networks: {
+  polygonAmoy: {
+    url: process.env.POLYGON_AMOY_RPC,
+    accounts: [process.env.PRIVATE_KEY],
+    chainId: 80002
+  }
+}
 ```
 
-## 🌟 Future Enhancements
+### Next.js Integration
 
-1. **Multi-token Support**: Accept multiple cryptocurrencies
-2. **NFT Integration**: Mint articles as NFTs
-3. **Staking Rewards**: Earn tokens for platform participation
-4. **Cross-chain Bridge**: Support multiple blockchains
-5. **Advanced Governance**: Quadratic voting, delegation
+- API routes for transaction logging
+- Server-side wallet address validation
+- Database integration for transaction history
+- Real-time balance updates
 
-## 📞 Support
+## 📞 Support & Troubleshooting
 
-For technical support or questions about blockchain features:
-- Check transaction status on [Mumbai PolygonScan](https://mumbai.polygonscan.com/)
-- Ensure sufficient MATIC for gas fees
-- Verify MetaMask network configuration
+### Common Issues
 
-## ⚠️ Disclaimers
+1. **MetaMask Connection**: Ensure Polygon Amoy is added to networks
+2. **Transaction Failures**: Check MATIC balance for gas fees
+3. **Demo Mode**: Contracts automatically use demo mode if not deployed
+4. **Network Switching**: Application handles network switching automatically
 
-- This is a demonstration on testnet
-- Test tokens have no real value
-- Always verify contract addresses
-- Use at your own risk in production
+### Useful Links
+
+- [Polygon Amoy Faucet](https://faucet.polygon.technology/)
+- [Amoy Block Explorer](https://amoy.polygonscan.com/)
+- [MetaMask Documentation](https://docs.metamask.io/)
+
+## ⚠️ Important Notes
+
+- **Testnet Only**: Current deployment uses Polygon Amoy testnet
+- **Demo Mode**: Application works without deployed contracts
+- **Test Tokens**: QUILL tokens have no real-world value
+- **Gas Fees**: Always ensure sufficient MATIC for transactions
 
 ---
-
-**Built with ❤️ using Ethereum, Polygon, and Next.js** 
