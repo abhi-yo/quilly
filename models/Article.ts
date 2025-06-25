@@ -1,26 +1,27 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 export interface IArticle {
   title: string;
   content: string;
   author: string;
   authorId: string;
+  tags: string[];
   createdAt: Date;
 }
 
 const articleSchema = new mongoose.Schema<IArticle>({
   title: {
     type: String,
-    required: [true, 'Title is required'],
+    required: [true, "Title is required"],
     trim: true,
-    minlength: [3, 'Title must be at least 3 characters long'],
-    maxlength: [100, 'Title cannot be more than 100 characters'],
+    minlength: [3, "Title must be at least 3 characters long"],
+    maxlength: [100, "Title cannot be more than 100 characters"],
   },
   content: {
     type: String,
-    required: [true, 'Content is required'],
+    required: [true, "Content is required"],
     trim: true,
-    minlength: [10, 'Content must be at least 10 characters long'],
+    minlength: [10, "Content must be at least 10 characters long"],
   },
   author: {
     type: String,
@@ -32,6 +33,16 @@ const articleSchema = new mongoose.Schema<IArticle>({
     required: true,
     index: true,
   },
+  tags: {
+    type: [String],
+    default: [],
+    validate: {
+      validator: function (tags: string[]) {
+        return tags.length <= 10;
+      },
+      message: "Cannot have more than 10 tags",
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -40,4 +51,5 @@ const articleSchema = new mongoose.Schema<IArticle>({
 
 articleSchema.index({ createdAt: -1 });
 
-export const Article = mongoose.models.Article || mongoose.model<IArticle>('Article', articleSchema); 
+export const Article =
+  mongoose.models.Article || mongoose.model<IArticle>("Article", articleSchema);

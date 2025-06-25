@@ -1,8 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 export interface IUser {
   email: string;
   name?: string;
+  bio?: string;
   role: string;
   createdAt: Date;
   needsRoleSelection?: boolean;
@@ -11,7 +12,7 @@ export interface IUser {
 const userSchema = new mongoose.Schema<IUser>({
   email: {
     type: String,
-    required: [true, 'Email is required'],
+    required: [true, "Email is required"],
     unique: true,
     trim: true,
     lowercase: true,
@@ -20,11 +21,16 @@ const userSchema = new mongoose.Schema<IUser>({
     type: String,
     trim: true,
   },
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: [500, "Bio cannot be more than 500 characters"],
+  },
   role: {
     type: String,
     required: true,
-    enum: ['reader', 'writer', 'admin'],
-    default: 'reader',
+    enum: ["reader", "writer", "admin"],
+    default: "reader",
   },
   needsRoleSelection: {
     type: Boolean,
@@ -37,8 +43,9 @@ const userSchema = new mongoose.Schema<IUser>({
 });
 
 // Add method to check if user is a writer
-userSchema.methods.isWriter = function(): boolean {
-  return this.role === 'writer' || this.role === 'admin';
+userSchema.methods.isWriter = function (): boolean {
+  return this.role === "writer" || this.role === "admin";
 };
 
-export const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema); 
+export const User =
+  mongoose.models.User || mongoose.model<IUser>("User", userSchema);

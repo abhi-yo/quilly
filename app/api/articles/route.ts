@@ -9,22 +9,34 @@ import mongoose from "mongoose";
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
-    
+
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId');
-    const limit = searchParams.get('limit');
-    
-    let query = {};
+    const userId = searchParams.get("userId");
+    const limit = searchParams.get("limit");
+    const tag = searchParams.get("tag");
+    const search = searchParams.get("search");
+
+    let query: any = {};
     if (userId) {
-      query = { authorId: userId };
+      query.authorId = userId;
     }
-    
+    if (tag) {
+      query.tags = { $in: [tag.toLowerCase()] };
+    }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
+        { tags: { $in: [new RegExp(search, "i")] } },
+      ];
+    }
+
     let articlesQuery = Article.find(query).sort({ createdAt: -1 });
-    
+
     if (limit) {
       articlesQuery = articlesQuery.limit(parseInt(limit));
     }
-    
+
     const articles = await articlesQuery.exec();
     return NextResponse.json(articles);
   } catch (error) {
@@ -40,7 +52,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     // Check if user is authenticated and has writer role
     if (!session?.user || session.user.role !== "writer") {
       return NextResponse.json(
@@ -49,7 +61,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { title, content } = await req.json();
+    const { title, content, tags } = await req.json();
 
     // Validate input
     if (!title || !content) {
@@ -59,23 +71,35 @@ export async function POST(req: Request) {
       );
     }
 
+    // Process tags
+    let processedTags: string[] = [];
+    if (tags && Array.isArray(tags)) {
+      processedTags = tags
+        .map((tag: string) => tag.trim().toLowerCase())
+        .filter((tag: string) => tag.length > 0)
+        .slice(0, 10); // Limit to 10 tags
+    }
+
     await connectToDatabase();
-    
+
     const article = await Article.create({
       title,
       content,
       author: session.user.name || "Anonymous",
       authorId: session.user.id,
+      tags: processedTags,
       createdAt: new Date(),
     });
 
     return NextResponse.json(article, { status: 201 });
   } catch (error) {
     console.error("Failed to create article:", error);
-    
+
     // Handle mongoose validation errors
     if (error instanceof mongoose.Error.ValidationError) {
-      const validationErrors = Object.values(error.errors).map(err => err.message);
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
       return NextResponse.json(
         { error: validationErrors.join(", ") },
         { status: 400 }
@@ -87,4 +111,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-} 
+}

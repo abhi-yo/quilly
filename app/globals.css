@@ -48,3 +48,78 @@
     @apply bg-black text-white;
   }
 }
+
+/* Article Editor Styles */
+.article-editor:empty:before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+  position: absolute;
+}
+
+.article-editor h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+  line-height: 1.2;
+}
+
+.article-editor h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+  line-height: 1.2;
+}
+
+.article-editor h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+  line-height: 1.2;
+}
+
+.article-editor blockquote {
+  border-left: 4px solid #374151;
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+  color: #9ca3af;
+}
+
+.article-editor ul,
+.article-editor ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+.article-editor pre {
+  margin: 1em 0;
+}
+
+.article-editor code {
+  display: block;
+  padding: 1em;
+  background-color: #1f2937;
+  color: #e5e7eb;
+  border-radius: 0.5em;
+  font-family: Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875em;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.article-editor img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 16px 0;
+}
+
+.article-editor a {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.article-editor a:hover {
+  color: #93c5fd;
+}
