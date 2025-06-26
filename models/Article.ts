@@ -6,6 +6,8 @@ export interface IArticle {
   author: string;
   authorId: string;
   tags: string[];
+  views: number;
+  reads: number;
   createdAt: Date;
 }
 
@@ -43,6 +45,16 @@ const articleSchema = new mongoose.Schema<IArticle>({
       message: "Cannot have more than 10 tags",
     },
   },
+  views: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  reads: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -50,6 +62,8 @@ const articleSchema = new mongoose.Schema<IArticle>({
 });
 
 articleSchema.index({ createdAt: -1 });
+articleSchema.index({ views: -1 });
+articleSchema.index({ authorId: 1, createdAt: -1 });
 
 export const Article =
   mongoose.models.Article || mongoose.model<IArticle>("Article", articleSchema);

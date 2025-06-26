@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { Article } from "@/models/Article";
+import { Comment } from "@/models/Comment";
 import mongoose from "mongoose";
 
 // GET /api/articles - Get all articles or user-specific articles
@@ -38,7 +39,20 @@ export async function GET(req: Request) {
     }
 
     const articles = await articlesQuery.exec();
-    return NextResponse.json(articles);
+
+    const articlesWithCommentCounts = await Promise.all(
+      articles.map(async (article) => {
+        const commentCount = await Comment.countDocuments({
+          articleId: article._id,
+        });
+        return {
+          ...article.toObject(),
+          comments: commentCount,
+        };
+      })
+    );
+
+    return NextResponse.json(articlesWithCommentCounts);
   } catch (error) {
     console.error("Failed to fetch articles:", error);
     return NextResponse.json(

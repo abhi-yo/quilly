@@ -30,6 +30,7 @@ interface Article {
   createdAt: string;
   tags?: string[];
   views?: number;
+  reads?: number;
   comments?: number;
 }
 
@@ -47,6 +48,7 @@ export default function ArticlePage({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [hasTrackedRead, setHasTrackedRead] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -57,6 +59,25 @@ export default function ArticlePage({ params }: { params: { id: string } }) {
   useEffect(() => {
     fetchArticle();
   }, [params.id]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (hasTrackedRead) return;
+
+      const scrollTop = window.pageYOffset;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      const scrollPercent = (scrollTop + windowHeight) / docHeight;
+
+      if (scrollPercent > 0.8) {
+        trackRead();
+        setHasTrackedRead(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasTrackedRead, params.id]);
 
   const fetchArticle = async () => {
     try {
@@ -89,6 +110,20 @@ export default function ArticlePage({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       console.error("Error fetching author info:", error);
+    }
+  };
+
+  const trackRead = async () => {
+    try {
+      await fetch(`/api/articles/${params.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "track_read" }),
+      });
+    } catch (error) {
+      console.error("Error tracking read:", error);
     }
   };
 
@@ -215,12 +250,14 @@ export default function ArticlePage({ params }: { params: { id: string } }) {
                   <span className="text-lg font-semibold">
                     {article.views?.toLocaleString() || 0}
                   </span>
+                  <span className="text-sm text-gray-500">views</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MessageCircle className="h-5 w-5" />
                   <span className="text-lg font-semibold">
                     {article.comments || 0}
                   </span>
+                  <span className="text-sm text-gray-500">comments</span>
                 </div>
               </div>
 
