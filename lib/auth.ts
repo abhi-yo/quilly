@@ -213,7 +213,15 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      return url.startsWith(baseUrl) ? url : baseUrl;
+      if (url.startsWith(baseUrl)) return url;
+      if (url.includes("callbackUrl")) {
+        const urlObj = new URL(url);
+        const callbackUrl = urlObj.searchParams.get("callbackUrl");
+        if (callbackUrl && callbackUrl.startsWith(baseUrl)) {
+          return callbackUrl;
+        }
+      }
+      return baseUrl;
     },
   },
   pages: {
