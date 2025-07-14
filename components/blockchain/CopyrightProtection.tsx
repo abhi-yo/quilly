@@ -1,43 +1,53 @@
 "use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Shield, CheckCircle, AlertTriangle, FileCheck, Search } from 'lucide-react';
-import { web3Service } from '@/lib/web3';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Shield,
+  CheckCircle,
+  AlertTriangle,
+  FileCheck,
+  Search,
+} from "lucide-react";
+import { web3Service } from "@/lib/web3";
+import { useToast } from "@/hooks/use-toast";
 
 interface CopyrightProtectionProps {
   title: string;
   content: string;
   authorId: string;
   onRegistered?: (txHash: string) => void;
+  articleId?: string;
 }
 
-export default function CopyrightProtection({ 
-  title, 
-  content, 
+export default function CopyrightProtection({
+  title,
+  content,
   authorId,
-  onRegistered 
+  onRegistered,
+  articleId,
 }: CopyrightProtectionProps) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [registrationStatus, setRegistrationStatus] = useState<'none' | 'registered' | 'verified'>('none');
-  const [contentHash, setContentHash] = useState<string>('');
+  const [registrationStatus, setRegistrationStatus] = useState<
+    "none" | "registered" | "verified"
+  >("none");
+  const [contentHash, setContentHash] = useState<string>("");
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const { toast } = useToast();
 
   const generateHash = async () => {
     try {
-      const response = await fetch('/api/blockchain/copyright', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/blockchain/copyright", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: 'generate-hash',
+          action: "generate-hash",
           title,
-          content
-        })
+          content,
+        }),
       });
 
       const result = await response.json();
@@ -46,7 +56,7 @@ export default function CopyrightProtection({
         return result.contentHash;
       }
     } catch (error) {
-      console.error('Error generating hash:', error);
+      console.error("Error generating hash:", error);
     }
     return null;
   };
@@ -54,9 +64,9 @@ export default function CopyrightProtection({
   const registerCopyright = async () => {
     if (!web3Service.isConnected()) {
       toast({
-        title: 'Wallet Not Connected',
-        description: 'Please connect your wallet first',
-        variant: 'destructive'
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet first",
+        variant: "destructive",
       });
       return;
     }
@@ -67,36 +77,36 @@ export default function CopyrightProtection({
       if (!hash) {
         hash = await generateHash();
         if (!hash) {
-          throw new Error('Failed to generate content hash');
+          throw new Error("Failed to generate content hash");
         }
       }
 
-      const txHash = await web3Service.registerContent(hash, title, '');
-      
-      await fetch('/api/blockchain/copyright', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const txHash = await web3Service.registerContent(hash, title, "");
+
+      await fetch("/api/blockchain/copyright", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: 'register',
+          action: "register",
           title,
           contentHash: hash,
-          txHash
-        })
+          txHash,
+          articleId,
+        }),
       });
 
-      setRegistrationStatus('registered');
+      setRegistrationStatus("registered");
       onRegistered?.(txHash);
-      
-      toast({
-        title: 'Copyright Registered!',
-        description: 'Your content is now protected on the blockchain',
-      });
 
+      toast({
+        title: "Copyright Registered!",
+        description: "Your content is now protected on the blockchain",
+      });
     } catch (error: any) {
       toast({
-        title: 'Registration Failed',
-        description: error.message || 'Failed to register copyright',
-        variant: 'destructive'
+        title: "Registration Failed",
+        description: error.message || "Failed to register copyright",
+        variant: "destructive",
       });
     } finally {
       setIsRegistering(false);
@@ -110,32 +120,31 @@ export default function CopyrightProtection({
       if (!hash) {
         hash = await generateHash();
         if (!hash) {
-          throw new Error('Failed to generate content hash');
+          throw new Error("Failed to generate content hash");
         }
       }
 
       const result = await web3Service.verifyContentOwnership(hash);
       setVerificationResult(result);
-      
+
       if (result.exists) {
-        setRegistrationStatus('verified');
+        setRegistrationStatus("verified");
         toast({
-          title: 'Copyright Verified',
-          description: 'Content ownership confirmed on blockchain',
+          title: "Copyright Verified",
+          description: "Content ownership confirmed on blockchain",
         });
       } else {
         toast({
-          title: 'No Copyright Found',
-          description: 'This content is not registered on the blockchain',
-          variant: 'destructive'
+          title: "No Copyright Found",
+          description: "This content is not registered on the blockchain",
+          variant: "destructive",
         });
       }
-
     } catch (error: any) {
       toast({
-        title: 'Verification Failed',
-        description: error.message || 'Failed to verify copyright',
-        variant: 'destructive'
+        title: "Verification Failed",
+        description: error.message || "Failed to verify copyright",
+        variant: "destructive",
       });
     } finally {
       setIsVerifying(false);
@@ -144,14 +153,14 @@ export default function CopyrightProtection({
 
   const getStatusBadge = () => {
     switch (registrationStatus) {
-      case 'registered':
+      case "registered":
         return (
           <Badge className="bg-green-500/20 text-green-300 border-green-500/20">
             <CheckCircle className="w-3 h-3 mr-1" />
             Registered
           </Badge>
         );
-      case 'verified':
+      case "verified":
         return (
           <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/20">
             <Shield className="w-3 h-3 mr-1" />
@@ -188,29 +197,45 @@ export default function CopyrightProtection({
         {contentHash && (
           <div className="bg-gray-800/50 p-3 rounded-lg">
             <p className="text-gray-400 text-xs mb-1">Content Hash</p>
-            <p className="text-white font-mono text-xs break-all">{contentHash}</p>
+            <p className="text-white font-mono text-xs break-all">
+              {contentHash}
+            </p>
           </div>
         )}
 
         {verificationResult && (
           <div className="bg-gray-800/50 p-3 rounded-lg">
-            <h4 className="text-white text-sm font-medium mb-2">Verification Result</h4>
+            <h4 className="text-white text-sm font-medium mb-2">
+              Verification Result
+            </h4>
             <div className="space-y-1 text-xs">
               <p className="text-gray-400">
-                Exists: <span className={verificationResult.exists ? 'text-green-300' : 'text-red-300'}>
-                  {verificationResult.exists ? 'Yes' : 'No'}
+                Exists:{" "}
+                <span
+                  className={
+                    verificationResult.exists
+                      ? "text-green-300"
+                      : "text-red-300"
+                  }
+                >
+                  {verificationResult.exists ? "Yes" : "No"}
                 </span>
               </p>
               {verificationResult.exists && (
                 <>
                   <p className="text-gray-400">
-                    Owner: <span className="text-white font-mono">
-                      {verificationResult.author.slice(0, 6)}...{verificationResult.author.slice(-4)}
+                    Owner:{" "}
+                    <span className="text-white font-mono">
+                      {verificationResult.author.slice(0, 6)}...
+                      {verificationResult.author.slice(-4)}
                     </span>
                   </p>
                   <p className="text-gray-400">
-                    Registered: <span className="text-white">
-                      {new Date(verificationResult.timestamp * 1000).toLocaleDateString()}
+                    Registered:{" "}
+                    <span className="text-white">
+                      {new Date(
+                        verificationResult.timestamp * 1000
+                      ).toLocaleDateString()}
                     </span>
                   </p>
                 </>
@@ -222,7 +247,7 @@ export default function CopyrightProtection({
         <div className="flex gap-2">
           <Button
             onClick={registerCopyright}
-            disabled={isRegistering || registrationStatus === 'registered'}
+            disabled={isRegistering || registrationStatus === "registered"}
             className="bg-white text-black hover:bg-gray-100 flex-1"
           >
             {isRegistering ? (
@@ -264,4 +289,4 @@ export default function CopyrightProtection({
       </CardContent>
     </Card>
   );
-} 
+}

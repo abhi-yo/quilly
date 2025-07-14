@@ -55,8 +55,8 @@ contract QuillyToken is IERC20 {
         return true;
     }
     
-    function allowance(address owner, address spender) public view override returns (uint256) {
-        return _allowances[owner][spender];
+    function allowance(address _owner, address spender) public view override returns (uint256) {
+        return _allowances[_owner][spender];
     }
     
     function approve(address spender, uint256 amount) public override returns (bool) {
@@ -84,12 +84,12 @@ contract QuillyToken is IERC20 {
         emit Transfer(sender, recipient, amount);
     }
     
-    function _approve(address owner, address spender, uint256 amount) internal {
-        require(owner != address(0), "Approve from zero address");
+    function _approve(address _owner, address spender, uint256 amount) internal {
+        require(_owner != address(0), "Approve from zero address");
         require(spender != address(0), "Approve to zero address");
         
-        _allowances[owner][spender] = amount;
-        emit Approval(owner, spender, amount);
+        _allowances[_owner][spender] = amount;
+        emit Approval(_owner, spender, amount);
     }
     
     function claimFaucet() external {

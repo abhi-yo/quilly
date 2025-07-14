@@ -8,6 +8,9 @@ export interface IArticle {
   tags: string[];
   views: number;
   reads: number;
+  copyrightProtected?: boolean;
+  copyrightTxHash?: string;
+  copyrightRecordId?: string;
   createdAt: Date;
 }
 
@@ -54,6 +57,18 @@ const articleSchema = new mongoose.Schema<IArticle>({
     type: Number,
     default: 0,
     min: 0,
+  },
+  copyrightProtected: {
+    type: Boolean,
+    default: false,
+  },
+  copyrightTxHash: {
+    type: String,
+    trim: true,
+  },
+  copyrightRecordId: {
+    type: String,
+    trim: true,
   },
   createdAt: {
     type: Date,

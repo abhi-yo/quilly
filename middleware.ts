@@ -100,14 +100,36 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
 
+        // Always allow API auth routes
         if (pathname.startsWith("/api/auth")) {
           return true;
         }
 
+        // Always allow auth pages
         if (pathname.startsWith("/auth")) {
           return true;
         }
 
+        // Always allow public pages
+        const publicPaths = [
+          "/about",
+          "/privacy",
+          "/terms",
+          "/contact",
+          "/help",
+          "/",
+        ];
+
+        const isPublicPath = publicPaths.some(
+          (path) =>
+            pathname === path || (path !== "/" && pathname.startsWith(path))
+        );
+
+        if (isPublicPath) {
+          return true;
+        }
+
+        // Protected paths that require authentication
         const protectedPaths = [
           "/dashboard",
           "/write",
@@ -115,6 +137,8 @@ export default withAuth(
           "/explore",
           "/profile",
           "/settings",
+          "/blockchain",
+          "/resources",
         ];
 
         const isProtectedPath = protectedPaths.some((path) =>
@@ -125,6 +149,7 @@ export default withAuth(
           return !!token;
         }
 
+        // Default to allowing access for other routes
         return true;
       },
     },

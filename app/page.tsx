@@ -103,7 +103,7 @@ function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
           <div className="max-w-4xl mx-auto text-center -mt-10 sm:-mt-20">
             <div className="relative max-w-5xl mx-auto mb-4 sm:mb-6 md:mb-8 mt-6 sm:mt-10">
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.2] sm:leading-[1.15] md:leading-[1.1] font-medium text-center">
+              <h1 className="text-4xl xs:text-5xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.2] sm:leading-[1.15] md:leading-[1.1] font-medium text-center">
                 <div className="mb-1 md:mb-2">
                   <span
                     className={`${instrumentSerif.className} text-white italic`}
@@ -124,17 +124,17 @@ function LandingPage() {
               </h1>
             </div>
 
-            <p className="text-base sm:text-lg text-gray-300 mb-8 sm:mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
+            <p className="text-lg sm:text-lg text-gray-300 mb-8 sm:mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
               Quilly is the modern writing platform for professionals who value
               quality over quantity. Join writers and readers in a
               distraction-free environment.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-2 sm:px-0">
               <Link href="/auth/signup">
                 <Button
                   size="lg"
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-medium px-8 sm:px-9 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto"
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-medium px-12 sm:px-9 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto min-w-[280px] sm:min-w-0"
                 >
                   Start Writing <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -143,7 +143,7 @@ function LandingPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="bg-transparent border border-gray-600 text-white hover:bg-gray-800/40 hover:border-gray-500 font-medium px-8 sm:px-9 py-3 rounded-xl transition-all duration-200 w-full sm:w-auto"
+                  className="bg-transparent border border-gray-600 text-white hover:bg-gray-800/40 hover:border-gray-500 font-medium px-12 sm:px-9 py-3 rounded-xl transition-all duration-200 w-full sm:w-auto min-w-[280px] sm:min-w-0"
                 >
                   Explore Articles
                 </Button>
@@ -154,7 +154,7 @@ function LandingPage() {
       </section>
 
       {/* App Preview */}
-      <section className="pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="hidden md:block pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="relative group">
             {/* Background cards for layered effect */}
@@ -401,16 +401,16 @@ function LandingPage() {
                 ))}
               </div>
               <blockquote className="text-gray-300 mb-8 text-base leading-relaxed">
-                "The writing experience is incredible. No distractions, just
-                pure focus on creating great content. The analytics help me
-                understand what resonates with my audience."
+                &ldquo;The writing experience is incredible. No distractions,
+                just pure focus on creating great content. The analytics help me
+                understand what resonates with my audience.&rdquo;
               </blockquote>
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full mr-4 flex items-center justify-center">
-                  <span className="text-white font-normal text-sm">SC</span>
+                  <span className="text-white font-normal text-sm">PS</span>
                 </div>
                 <div>
-                  <div className="font-normal text-white">Sarah Chen</div>
+                  <div className="font-normal text-white">Priya Sharma</div>
                   <div className="text-gray-400 text-xs">
                     Tech Writer & Content Strategist
                   </div>
@@ -428,16 +428,16 @@ function LandingPage() {
                 ))}
               </div>
               <blockquote className="text-gray-300 mb-8 text-base leading-relaxed">
-                "Finally, a platform that prioritizes quality content over
+                &ldquo;Finally, a platform that prioritizes quality content over
                 noise. The reading experience is unmatched, and I discover
-                amazing articles daily."
+                amazing articles daily.&rdquo;
               </blockquote>
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full mr-4 flex items-center justify-center">
-                  <span className="text-white font-normal text-sm">MJ</span>
+                  <span className="text-white font-normal text-sm">AK</span>
                 </div>
                 <div>
-                  <div className="font-normal text-white">Marcus Johnson</div>
+                  <div className="font-normal text-white">Arjun Kumar</div>
                   <div className="text-gray-400 text-xs">Product Manager</div>
                 </div>
               </div>
@@ -453,16 +453,16 @@ function LandingPage() {
                 ))}
               </div>
               <blockquote className="text-gray-300 mb-8 text-base leading-relaxed">
-                "The analytics dashboard is a game-changer. I can see exactly
-                how my content performs and my engagement has increased
-                significantly since joining."
+                &ldquo;The analytics dashboard is a game-changer. I can see
+                exactly how my content performs and my engagement has increased
+                significantly since joining.&rdquo;
               </blockquote>
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full mr-4 flex items-center justify-center">
-                  <span className="text-white font-normal text-sm">ER</span>
+                  <span className="text-white font-normal text-sm">RG</span>
                 </div>
                 <div>
-                  <div className="font-normal text-white">Emily Rodriguez</div>
+                  <div className="font-normal text-white">Rhea Gupta</div>
                   <div className="text-gray-400 text-xs">
                     Content Creator & Blogger
                   </div>
@@ -564,7 +564,7 @@ function LandingPage() {
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li>
                   <Link
-                    href="/resources"
+                    href="/help"
                     className="hover:text-white transition-colors"
                   >
                     Help Center
@@ -572,7 +572,7 @@ function LandingPage() {
                 </li>
                 <li>
                   <Link
-                    href="/resources"
+                    href="/help"
                     className="hover:text-white transition-colors"
                   >
                     Writing Guide
@@ -580,7 +580,7 @@ function LandingPage() {
                 </li>
                 <li>
                   <Link
-                    href="/resources"
+                    href="/help"
                     className="hover:text-white transition-colors"
                   >
                     Best Practices
@@ -591,7 +591,7 @@ function LandingPage() {
                     href="/resources"
                     className="hover:text-white transition-colors"
                   >
-                    API Docs
+                    Analytics Tools
                   </Link>
                 </li>
               </ul>
@@ -601,7 +601,7 @@ function LandingPage() {
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li>
                   <Link
-                    href="/resources"
+                    href="/about"
                     className="hover:text-white transition-colors"
                   >
                     About
@@ -609,7 +609,7 @@ function LandingPage() {
                 </li>
                 <li>
                   <Link
-                    href="/resources"
+                    href="/privacy"
                     className="hover:text-white transition-colors"
                   >
                     Privacy
@@ -617,7 +617,7 @@ function LandingPage() {
                 </li>
                 <li>
                   <Link
-                    href="/resources"
+                    href="/terms"
                     className="hover:text-white transition-colors"
                   >
                     Terms
@@ -625,7 +625,7 @@ function LandingPage() {
                 </li>
                 <li>
                   <Link
-                    href="/resources"
+                    href="/contact"
                     className="hover:text-white transition-colors"
                   >
                     Contact

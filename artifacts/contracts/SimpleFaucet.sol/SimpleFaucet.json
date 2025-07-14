@@ -1,0 +1,207 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "SimpleFaucet",
+  "sourceName": "contracts/SimpleFaucet.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Claimed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "claim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "cooldown",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "dispenseAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "lastClaim",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "time",
+          "type": "uint256"
+        }
+      ],
+      "name": "setCooldown",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "setDispenseAmount",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461008c5733156100765760008054336001600160a01b03198216811783556040519290916001600160a01b0316907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09080a367016345785d8a0000600155610e1060025561045c90816100928239f35b631e4fbdf760e01b815260006004820152602490fd5b600080fdfe60406080815260048036101561001457600080fd5b600091823560e01c80630dc80322146103d8578381632e1a7d4d14610391575080634e71d92d146102655780634fc3f41a146102435780635c16e15e14610209578063715018a6146101af578063787a08a6146101905780638da5cb5b14610168578063a9c8d60414610145578063d0e30db01461012b5763f2fde38b1461009b57600080fd5b34610127576020366003190112610127576001600160a01b03823581811693919290849003610123576100cc6103fa565b831561010d57505082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b51631e4fbdf760e01b8152908101849052602490fd5b8480fd5b8280fd5b83806003193601126101425761013f6103fa565b80f35b80fd5b8382346101645781600319360112610164576020906001549051908152f35b5080fd5b838234610164578160031936011261016457905490516001600160a01b039091168152602090f35b8382346101645781600319360112610164576020906002549051908152f35b83346101425780600319360112610142576101c86103fa565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b50903461012757602036600319011261012757356001600160a01b0381169081900361012757828291602094526003845220549051908152f35b5050346101645760203660031901126101645761025e6103fa565b3560025580f35b509034610127578260031936011261012757338352600360205281832054600254810180911161037e574210610349574760015411610307575033825260036020524281832055818080806001548181156102fe575b3390f1156102f45760015490519081527fd8138f8a3f377c5259ca548e70e4c2de94f129f5a11036a15b69513cba2b426a60203392a280f35b51903d90823e3d90fd5b506108fc6102bb565b6020606492519162461bcd60e51b8352820152601b60248201527f496e73756666696369656e74206661756365742062616c616e636500000000006044820152fd5b6020606492519162461bcd60e51b8352820152601060248201526f10dbdbdb191bdddb881b9bdd081b595d60821b6044820152fd5b634e487b7160e01b845260118252602484fd5b828185346101645760203660031901126101645781808092356103b26103fa565b81546001600160a01b03168282156103cf575bf1156102f4575080f35b506108fc6103c5565b505034610164576020366003190112610164576103f36103fa565b3560015580f35b6000546001600160a01b0316330361040e57565b60405163118cdaa760e01b8152336004820152602490fdfea2646970667358221220c93bc1dda51d93e8dc6ca71e07fc8acc6d64fcfea1884e5b42dfc742619f04e664736f6c63430008140033",
+  "deployedBytecode": "0x60406080815260048036101561001457600080fd5b600091823560e01c80630dc80322146103d8578381632e1a7d4d14610391575080634e71d92d146102655780634fc3f41a146102435780635c16e15e14610209578063715018a6146101af578063787a08a6146101905780638da5cb5b14610168578063a9c8d60414610145578063d0e30db01461012b5763f2fde38b1461009b57600080fd5b34610127576020366003190112610127576001600160a01b03823581811693919290849003610123576100cc6103fa565b831561010d57505082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b51631e4fbdf760e01b8152908101849052602490fd5b8480fd5b8280fd5b83806003193601126101425761013f6103fa565b80f35b80fd5b8382346101645781600319360112610164576020906001549051908152f35b5080fd5b838234610164578160031936011261016457905490516001600160a01b039091168152602090f35b8382346101645781600319360112610164576020906002549051908152f35b83346101425780600319360112610142576101c86103fa565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b50903461012757602036600319011261012757356001600160a01b0381169081900361012757828291602094526003845220549051908152f35b5050346101645760203660031901126101645761025e6103fa565b3560025580f35b509034610127578260031936011261012757338352600360205281832054600254810180911161037e574210610349574760015411610307575033825260036020524281832055818080806001548181156102fe575b3390f1156102f45760015490519081527fd8138f8a3f377c5259ca548e70e4c2de94f129f5a11036a15b69513cba2b426a60203392a280f35b51903d90823e3d90fd5b506108fc6102bb565b6020606492519162461bcd60e51b8352820152601b60248201527f496e73756666696369656e74206661756365742062616c616e636500000000006044820152fd5b6020606492519162461bcd60e51b8352820152601060248201526f10dbdbdb191bdddb881b9bdd081b595d60821b6044820152fd5b634e487b7160e01b845260118252602484fd5b828185346101645760203660031901126101645781808092356103b26103fa565b81546001600160a01b03168282156103cf575bf1156102f4575080f35b506108fc6103c5565b505034610164576020366003190112610164576103f36103fa565b3560015580f35b6000546001600160a01b0316330361040e57565b60405163118cdaa760e01b8152336004820152602490fdfea2646970667358221220c93bc1dda51d93e8dc6ca71e07fc8acc6d64fcfea1884e5b42dfc742619f04e664736f6c63430008140033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
