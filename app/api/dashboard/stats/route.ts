@@ -5,6 +5,8 @@ import { connectToDatabase } from "@/lib/db";
 import { Article } from "@/models/Article";
 import { Comment } from "@/models/Comment";
 
+export const dynamic = "force-dynamic";
+
 // Helper function to format date as 'YYYY-MM-DD'
 const formatDate = (date: Date): string => {
   return date.toISOString().split("T")[0];
