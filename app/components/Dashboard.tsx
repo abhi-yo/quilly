@@ -28,6 +28,13 @@ export default function Dashboard() {
     engagementRate: 0,
   });
 
+  // Helper function to strip HTML tags and get plain text
+  const stripHtmlTags = (html: string) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
   const [analytics, setAnalytics] = useState({
     words: { value: 0 },
     trends: [],
@@ -275,7 +282,11 @@ export default function Dashboard() {
                             {article.title}
                           </h3>
                           <p className="text-gray-400 text-sm mt-1 line-clamp-2">
-                            {article.content?.substring(0, 100)}...
+                            {stripHtmlTags(article.content || "").substring(
+                              0,
+                              100
+                            )}
+                            ...
                           </p>
                           <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
                             <span>
@@ -357,7 +368,11 @@ export default function Dashboard() {
                             {article.title}
                           </h3>
                           <p className="text-gray-400 text-sm mt-1 line-clamp-2">
-                            {article.content?.substring(0, 80)}...
+                            {stripHtmlTags(article.content || "").substring(
+                              0,
+                              80
+                            )}
+                            ...
                           </p>
                         </div>
                       </div>
