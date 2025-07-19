@@ -269,45 +269,6 @@
         "IERC20",
         "QuillyToken"
       ]
-    },
-    "/Users/akshatsingh/Desktop/contentplatform/contracts/SimpleFaucet.sol": {
-      "lastModificationDate": 1752503291951,
-      "contentHash": "3a315e9ade8dfaaf7b6ea547b342a194",
-      "sourceName": "contracts/SimpleFaucet.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "viaIR": true,
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "SimpleFaucet"
-      ]
     }
   }
 }
