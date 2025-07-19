@@ -195,6 +195,11 @@ export class Web3Service {
 
       const fee = await contract.registrationFee();
 
+      // Get current gas price
+      const feeData = await this.provider!.getFeeData();
+      const gasPrice = feeData.gasPrice || ethers.parseUnits("30", "gwei");
+
+      // Estimate gas with a buffer
       const gasEstimate = await contract.registerContent.estimateGas(
         contentHash,
         title,
@@ -202,16 +207,40 @@ export class Web3Service {
         { value: fee }
       );
 
+      // Add 50% buffer to gas estimate and use current gas price
       const tx = await contract.registerContent(contentHash, title, ipfsHash, {
         value: fee,
-        gasLimit: (gasEstimate * BigInt(120)) / BigInt(100),
+        gasLimit: (gasEstimate * BigInt(150)) / BigInt(100), // 50% buffer
+        gasPrice: (gasPrice * BigInt(110)) / BigInt(100), // 10% higher gas price
       });
 
       return tx.hash;
     } catch (error: any) {
       console.error("Registration error:", error);
 
-      if (error.reason?.includes("already registered")) {
+      // Handle specific Polygon Amoy testnet issues
+      if (
+        error.code === "INSUFFICIENT_FUNDS" ||
+        error.message?.includes("insufficient funds")
+      ) {
+        throw new Error(
+          "Insufficient MATIC to pay for gas. Please get more MATIC from the faucet."
+        );
+      } else if (
+        error.code === "UNPREDICTABLE_GAS_LIMIT" ||
+        error.message?.includes("gas")
+      ) {
+        throw new Error(
+          "Gas estimation failed. Please try again in a few moments."
+        );
+      } else if (
+        error.code === "NETWORK_ERROR" ||
+        error.message?.includes("network")
+      ) {
+        throw new Error(
+          "Network error. Please check your connection and try again."
+        );
+      } else if (error.reason?.includes("already registered")) {
         throw new Error("This content has already been registered");
       } else if (error.reason?.includes("Insufficient")) {
         throw new Error("Insufficient payment for registration fee");
@@ -252,7 +281,9 @@ export class Web3Service {
         blockNumber: Number(result[4]),
       };
     } catch (error: any) {
-      console.error("Verification error:", error);
+      if (process.env.NODE_ENV === "production") {
+        console.error("Verification error:", error);
+      }
       throw new Error("Failed to verify content ownership");
     }
   }
