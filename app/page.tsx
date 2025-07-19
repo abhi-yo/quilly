@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +17,21 @@ import {
   Check,
   Star,
   FileCheck,
+  Eye,
+  Plus,
+  FileText,
+  Shield,
+  TrendingUp,
+  User,
+  Edit3,
+  Clock,
+  Heart,
+  Bookmark,
 } from "lucide-react";
 import { DashboardMockup } from "@/components/mockups/dashboard-mockup";
 import { WritingMockup } from "@/components/mockups/writing-mockup";
 import { ExploreMockup } from "@/components/mockups/explore-mockup";
+import { motion } from "framer-motion";
 import { Instrument_Serif } from "next/font/google";
 
 const instrumentSerif = Instrument_Serif({
@@ -156,27 +166,259 @@ function LandingPage() {
       {/* App Preview */}
       <section className="hidden md:block pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="relative group">
+          <div className="relative">
             {/* Background cards for layered effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-800 rounded-2xl transform rotate-1 scale-[0.98] opacity-30 blur-sm"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-gray-750 to-gray-850 rounded-2xl transform -rotate-1 scale-[0.99] opacity-50 blur-[1px]"></div>
 
             {/* Main card */}
-            <div className="relative bg-gradient-to-r from-gray-800/90 to-gray-900/90 backdrop-blur-sm rounded-2xl p-[3px] shadow-2xl border border-white/10 group-hover:border-white/20 transition-all duration-500">
+            <div className="relative bg-gradient-to-r from-gray-800/90 to-gray-900/90 backdrop-blur-sm rounded-2xl p-[3px] shadow-2xl border border-white/10">
               <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/dashboard.png"
-                  alt="Quilly Dashboard"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto rounded-2xl transform group-hover:scale-[1.01] transition-transform duration-700 ease-out"
-                  priority
-                />
+                {/* Interactive Dashboard Preview */}
+                <div className="w-full aspect-[2/1] relative">
+                  <motion.div
+                    className="w-full h-full bg-gradient-to-br from-gray-950 via-black to-gray-900 text-white p-6 rounded-2xl overflow-hidden flex flex-col"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8 }}
+                  >
+                    {/* Header with view toggle */}
+                    <motion.div
+                      className="flex items-center justify-between mb-6"
+                      initial={{ y: -20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30"
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          transition={{ type: "spring", stiffness: 400 }}
+                        >
+                          <BarChart3 className="h-4 w-4 text-blue-400" />
+                        </motion.div>
+                        <h1 className="text-lg font-semibold text-white">
+                          Dashboard
+                        </h1>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {/* View Toggle */}
+                        <motion.div
+                          className="flex bg-gray-800/50 rounded-lg p-1 border border-gray-700/50"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          <button className="px-3 py-1.5 text-xs rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                            <Edit3 className="h-3 w-3" />
+                            Writer
+                          </button>
+                          <button className="px-3 py-1.5 text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            Reader
+                          </button>
+                        </motion.div>
+
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                          <span className="text-white text-sm font-semibold">
+                            A
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Stats Cards */}
+                    <motion.div
+                      className="grid grid-cols-4 gap-4 mb-6"
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      {[
+                        {
+                          label: "Published",
+                          value: "12",
+                          subtitle: "articles",
+                          icon: FileText,
+                        },
+                        {
+                          label: "Total Views",
+                          value: "2.4K",
+                          subtitle: "this month",
+                          icon: Eye,
+                        },
+                        {
+                          label: "Bookmarked",
+                          value: "156",
+                          subtitle: "by readers",
+                          icon: Bookmark,
+                        },
+                        {
+                          label: "Protected",
+                          value: "8",
+                          subtitle: "blockchain",
+                          icon: Shield,
+                        },
+                      ].map((stat, index) => {
+                        const IconComponent = stat.icon;
+                        return (
+                          <motion.div
+                            key={index}
+                            className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.6 + index * 0.1 }}
+                            whileHover={{ y: -2 }}
+                          >
+                            <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+                              <IconComponent className="h-4 w-4" />
+                              {stat.label}
+                            </div>
+                            <div className="text-2xl font-bold text-white mb-1">
+                              {stat.value}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {stat.subtitle}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </motion.div>
+
+                    {/* Main Content - Articles and Analytics */}
+                    <div className="grid grid-cols-3 gap-6 flex-1">
+                      {/* Articles Section */}
+                      <motion.div
+                        className="col-span-2 bg-gray-800/30 border border-gray-700/50 rounded-xl p-4"
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.8 }}
+                      >
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-semibold text-white">
+                              My Published Articles
+                            </h3>
+                            <span className="px-2 py-1 bg-blue-500/20 border border-blue-500/30 rounded text-xs text-blue-300">
+                              Writer View
+                            </span>
+                          </div>
+                          <span className="text-xs text-blue-400 cursor-pointer">
+                            View All
+                          </span>
+                        </div>
+
+                        {/* Articles List */}
+                        <div className="space-y-3">
+                          {[
+                            {
+                              title: "Protecting Your Words in the Digital Age",
+                              views: "1.2K",
+                              date: "2 days ago",
+                            },
+                            {
+                              title:
+                                "Why Blockchain Matters for Modern Writers",
+                              views: "856",
+                              date: "4 days ago",
+                            },
+                            {
+                              title:
+                                "The Future of Creativity: How Blockchain...",
+                              views: "643",
+                              date: "1 week ago",
+                              protected: true,
+                            },
+                          ].map((article, i) => (
+                            <motion.div
+                              key={i}
+                              className="flex items-center justify-between py-2"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 1 + i * 0.1 }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`w-2 h-2 rounded-full ${
+                                    article.protected
+                                      ? "bg-green-400"
+                                      : "bg-blue-400"
+                                  }`}
+                                />
+                                <div>
+                                  <div className="text-sm text-white">
+                                    {article.title}
+                                  </div>
+                                  <div className="text-xs text-gray-400 flex items-center gap-2">
+                                    <span>{article.date}</span>
+                                    {article.protected && (
+                                      <span className="text-green-400 flex items-center gap-1">
+                                        <Shield className="h-3 w-3" />
+                                        Protected
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <Eye className="h-3 w-3" />
+                                <span>{article.views}</span>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+
+                        {/* Growth Summary */}
+                        <div className="mt-4 pt-3 border-t border-gray-700/50 flex items-center justify-between">
+                          <span className="text-xs text-gray-400">
+                            This month
+                          </span>
+                          <span className="text-xs text-green-400 flex items-center gap-1">
+                            <TrendingUp className="h-3 w-3" />
+                            +15% growth
+                          </span>
+                        </div>
+                      </motion.div>
+
+                      {/* Analytics Panel */}
+                      <motion.div
+                        className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4"
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 1 }}
+                      >
+                        <h3 className="text-sm font-semibold text-white mb-4">
+                          Analytics
+                        </h3>
+
+                        {/* Simple Chart */}
+                        <div className="h-24 mb-4 bg-gray-900/50 rounded-lg p-3">
+                          <svg viewBox="0 0 100 32" className="w-full h-full">
+                            <motion.polyline
+                              points="5,28 25,20 45,24 65,16 85,8"
+                              fill="none"
+                              stroke="#3B82F6"
+                              strokeWidth="2"
+                              initial={{ pathLength: 0 }}
+                              animate={{ pathLength: 1 }}
+                              transition={{ delay: 1.2, duration: 1.5 }}
+                            />
+                          </svg>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-400">
+                            This week
+                          </span>
+                          <span className="text-xs text-green-400">+23%</span>
+                        </div>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                </div>
               </div>
             </div>
-
-            {/* Subtle glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl blur-2xl scale-110 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
           </div>
         </div>
       </section>
