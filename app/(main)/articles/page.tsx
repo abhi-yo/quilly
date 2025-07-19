@@ -43,6 +43,13 @@ export default function ArticlesPage() {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to strip HTML tags and get plain text
+  const stripHtmlTags = (html: string) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
@@ -317,7 +324,8 @@ export default function ArticlesPage() {
                       {article.title}
                     </h3>
                     <p className="text-gray-400 line-clamp-3 leading-relaxed text-sm mb-4">
-                      {article.content?.substring(0, 120)}...
+                      {stripHtmlTags(article.content || "").substring(0, 120)}
+                      ...
                     </p>
 
                     <div className="flex flex-wrap gap-1.5 mb-4">
