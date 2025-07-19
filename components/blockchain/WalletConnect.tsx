@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Wallet, RefreshCw, Gift } from 'lucide-react';
-import { web3Service } from '@/lib/web3';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Wallet, RefreshCw } from "lucide-react";
+import { web3Service } from "@/lib/web3";
+import { useToast } from "@/hooks/use-toast";
 
 interface WalletConnectProps {
   onConnect?: (address: string) => void;
@@ -14,10 +14,9 @@ interface WalletConnectProps {
 
 export default function WalletConnect({ onConnect }: WalletConnectProps) {
   const [isConnected, setIsConnected] = useState(false);
-  const [address, setAddress] = useState<string>('');
-  const [balance, setBalance] = useState<string>('0');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isClaiming, setIsClaiming] = useState(false);
+  const [address, setAddress] = useState<string>("");
+  const [balance, setBalance] = useState<string>("0.00");
+  const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,89 +25,67 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
 
   const checkConnection = async () => {
     try {
-      if (typeof window !== 'undefined' && web3Service.isConnected()) {
-        const currentAccount = await web3Service.getCurrentAccount();
-        if (currentAccount) {
-          setAddress(currentAccount);
+      const connected = web3Service.isConnected();
+      if (connected) {
+        const addr = await web3Service.getCurrentAccount();
+        if (addr) {
+          setAddress(addr);
           setIsConnected(true);
-          await updateBalance(currentAccount);
-          onConnect?.(currentAccount);
+          await updateBalance(addr);
+          onConnect?.(addr);
         }
       }
     } catch (error) {
-      console.error('Error checking connection:', error);
-    }
-  };
-
-  const updateBalance = async (walletAddress: string) => {
-    try {
-      const tokenBalance = await web3Service.getTokenBalance(walletAddress);
-      setBalance(tokenBalance);
-    } catch (error) {
-      console.error('Error fetching balance:', error);
+      console.error("Error checking connection:", error);
     }
   };
 
   const connectWallet = async () => {
-    setIsLoading(true);
+    setIsConnecting(true);
     try {
-      const walletAddress = await web3Service.connectWallet();
-      if (walletAddress) {
-        setAddress(walletAddress);
+      const addr = await web3Service.connectWallet();
+      if (addr) {
+        setAddress(addr);
         setIsConnected(true);
-        await updateBalance(walletAddress);
-        onConnect?.(walletAddress);
-        
+        await updateBalance(addr);
+        onConnect?.(addr);
         toast({
-          title: 'Wallet Connected',
-          description: `Connected to ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+          title: "Wallet Connected",
+          description: `Connected to ${addr.slice(0, 6)}...${addr.slice(-4)}`,
         });
       }
     } catch (error: any) {
       toast({
-        title: 'Connection Failed',
-        description: error.message || 'Failed to connect wallet',
-        variant: 'destructive'
+        title: "Connection Failed",
+        description: error.message || "Failed to connect wallet",
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsConnecting(false);
     }
   };
 
-  const claimFaucet = async () => {
-    if (!isConnected) return;
-    
-    setIsClaiming(true);
+  const updateBalance = async (walletAddress?: string) => {
     try {
-      const txHash = await web3Service.claimFaucet();
-      
-      // In demo mode, immediately update balance
-      setBalance("100.00");
-      
+      const addr = walletAddress || address;
+      if (!addr) return;
+
+      const tokenBalance = await web3Service.getTokenBalance(addr);
+      setBalance(tokenBalance);
+    } catch (error) {
+      console.error("Error updating balance:", error);
       toast({
-        title: 'Tokens Claimed!',
-        description: `Demo transaction completed: ${txHash.slice(0, 10)}...`
+        title: "Error",
+        description: "Failed to update balance",
+        variant: "destructive",
       });
-      
-      setTimeout(() => updateBalance(address), 3000);
-    } catch (error: any) {
-      toast({
-        title: 'Claim Failed',
-        description: error.message || 'Failed to claim tokens',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsClaiming(false);
     }
   };
-
-  const formatAddress = (addr: string) => 
-    `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   if (!isConnected) {
     return (
-      <Card className="bg-gray-900/50 border-gray-800">
-        <CardHeader>
+      <Card className="bg-gray-900 border-gray-800">
+        <CardHeader className="pb-4">
           <CardTitle className="text-white flex items-center gap-2">
             <Wallet className="w-5 h-5" />
             Connect Wallet
@@ -116,19 +93,15 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
         </CardHeader>
         <CardContent>
           <p className="text-gray-400 mb-4 text-sm">
-            Connect your wallet to register and protect your content on the blockchain with immutable ownership records.
+            Connect your MetaMask wallet to register your content on the
+            blockchain and create immutable proof of ownership.
           </p>
-          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-4">
-            <p className="text-yellow-300 text-xs">
-              <strong>Demo Mode:</strong> Smart contracts are not deployed yet. All transactions are simulated for demonstration purposes.
-            </p>
-          </div>
-          <Button 
+          <Button
             onClick={connectWallet}
-            disabled={isLoading}
-            className="w-full bg-white text-black hover:bg-gray-100"
+            disabled={isConnecting}
+            className="w-full bg-blue-600 hover:bg-blue-700"
           >
-            {isLoading ? (
+            {isConnecting ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 Connecting...
@@ -146,50 +119,32 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
   }
 
   return (
-    <Card className="bg-gray-900/50 border-gray-800">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
+    <Card className="bg-gray-900 border-gray-800">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-white flex items-center gap-2">
             <Wallet className="w-5 h-5" />
             Wallet Connected
-          </div>
-          <Badge variant="secondary" className="bg-green-500/20 text-green-300">
+          </CardTitle>
+          <Badge variant="secondary" className="bg-green-900 text-green-100">
             Connected
           </Badge>
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-gray-400 text-sm">Address</p>
-          <p className="text-white font-mono text-sm">{formatAddress(address)}</p>
+          <p className="text-gray-400 text-sm mb-1">Address</p>
+          <p className="text-white font-mono text-sm">
+            {address.slice(0, 6)}...{address.slice(-4)}
+          </p>
         </div>
-        
+
         <div>
-          <p className="text-gray-400 text-sm">QUILL Balance</p>
-          <p className="text-white font-bold text-lg">{parseFloat(balance).toFixed(2)} QUILL</p>
+          <p className="text-gray-400 text-sm mb-1">QUILL Balance</p>
+          <p className="text-white font-bold text-lg">{balance} QUILL</p>
         </div>
 
         <div className="flex gap-2">
-          <Button
-            onClick={claimFaucet}
-            disabled={isClaiming}
-            variant="outline"
-            size="sm"
-            className="border-gray-700 text-gray-300 hover:bg-gray-800"
-          >
-            {isClaiming ? (
-              <>
-                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-                Claiming...
-              </>
-            ) : (
-              <>
-                <Gift className="w-3 h-3 mr-1" />
-                Claim 100 QUILL
-              </>
-            )}
-          </Button>
-          
           <Button
             onClick={() => updateBalance(address)}
             variant="outline"
@@ -200,7 +155,13 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
             Refresh
           </Button>
         </div>
+
+        <div className="pt-2 border-t border-gray-800">
+          <p className="text-gray-500 text-xs">
+            Ready to register content on Polygon blockchain
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
-} 
+}

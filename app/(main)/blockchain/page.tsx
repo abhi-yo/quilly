@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import WalletConnect from "@/components/blockchain/WalletConnect";
+import SimplifiedWalletConnect from "@/components/blockchain/SimplifiedWalletConnect";
 import CopyrightProtection from "@/components/blockchain/CopyrightProtection";
 import { useSession } from "next-auth/react";
 import {
@@ -77,7 +77,7 @@ export default function BlockchainPage() {
             Connect your MetaMask wallet to register your content on the
             blockchain and create immutable proof of ownership.
           </p>
-          <WalletConnect onConnect={handleWalletConnect} />
+          <SimplifiedWalletConnect onConnect={handleWalletConnect} />
         </div>
 
         {/* Demo Section */}
