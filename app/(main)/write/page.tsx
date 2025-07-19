@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+
 import {
   PenTool,
   AlertTriangle,
-  Copyright,
   Eye,
   FileText,
   Bold,
@@ -48,7 +47,7 @@ export default function WritePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPreview, setShowPreview] = useState(false);
-  const [enableCopyright, setEnableCopyright] = useState(true);
+
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const [editorState, setEditorState] = useState<EditorState>({
@@ -118,6 +117,18 @@ export default function WritePage() {
       router.push("/dashboard");
     }
   }, [status, isWriter, router, toast]);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const handlePaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      const text = e.clipboardData?.getData("text/plain") || "";
+      document.execCommand("insertText", false, text);
+    };
+    const el = contentRef.current;
+    el.addEventListener("paste", handlePaste as any);
+    return () => el.removeEventListener("paste", handlePaste as any);
+  }, []);
 
   const execCommand = (command: string, value?: string) => {
     if (!contentRef.current) return;
@@ -810,11 +821,7 @@ export default function WritePage() {
                       ref={contentRef}
                       contentEditable
                       onInput={handleContentInput}
-                      className="article-editor w-full h-full min-h-[400px] text-lg leading-relaxed bg-transparent text-white focus:outline-none resize-none p-4 rounded-lg border border-gray-800/50 hover:border-gray-700/50 focus:border-gray-600/50 transition-colors relative"
-                      style={{
-                        whiteSpace: "pre-wrap",
-                        wordWrap: "break-word",
-                      }}
+                      className="w-full h-full min-h-[400px] text-lg leading-relaxed bg-transparent border-none text-white placeholder-gray-500 focus:ring-0 p-4 focus:outline-none"
                       suppressContentEditableWarning={true}
                       data-placeholder="Start writing your article here... Use the toolbar above to format your text."
                     />
@@ -870,40 +877,6 @@ Tips:
                           #{tag.trim()}
                         </Badge>
                       ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="border-t border-gray-900/50 pt-6 mt-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between p-3 md:p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl gap-3 md:gap-0">
-                    <div className="flex items-start gap-3">
-                      <Copyright className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="text-white font-medium text-sm md:text-base">
-                          Blockchain Copyright Protection
-                        </h4>
-                        <p className="text-gray-400 text-xs md:text-sm mt-1">
-                          Automatically register your article on the blockchain
-                          for immutable ownership proof
-                        </p>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={enableCopyright}
-                      onCheckedChange={setEnableCopyright}
-                      className="self-start md:self-center"
-                    />
-                  </div>
-                  {enableCopyright && (
-                    <div className="mt-3 p-3 bg-gray-800/30 rounded-lg">
-                      <p className="text-gray-400 text-xs">
-                        ✓ Your article will be hashed and registered on the
-                        Polygon blockchain
-                        <br />
-                        ✓ Creates permanent, tamper-proof proof of ownership
-                        <br />✓ Small gas fee (~$0.01) required for blockchain
-                        transaction
-                      </p>
                     </div>
                   )}
                 </div>
