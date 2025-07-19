@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { analyzeBlog } from '@/lib/api';
-import AnalysisResults from './AnalysisResults';
-import { Link, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { analyzeBlog } from "@/lib/api";
+import AnalysisResults from "./AnalysisResults";
+import { Link, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface AnalysisData {
   sentiment?: {
@@ -31,7 +31,7 @@ interface AnalysisData {
 }
 
 export default function BlogAnalyzer() {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const { toast } = useToast();
@@ -39,9 +39,9 @@ export default function BlogAnalyzer() {
   const handleAnalyze = async () => {
     if (!url.trim()) {
       toast({
-        title: 'Error',
-        description: 'Please enter a valid URL',
-        variant: 'destructive',
+        title: "Error",
+        description: "Please enter a valid URL",
+        variant: "destructive",
       });
       return;
     }
@@ -49,21 +49,20 @@ export default function BlogAnalyzer() {
     try {
       setIsAnalyzing(true);
       setAnalysisData(null);
-      
+
       const result = await analyzeBlog(url);
-      console.log('Blog Analysis Result:', result);
       setAnalysisData(result);
-      
+
       toast({
-        title: 'Success',
-        description: 'Blog analysis completed successfully!',
+        title: "Success",
+        description: "Blog analysis completed successfully!",
       });
     } catch (error) {
-      console.error('Analysis error:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to analyze the blog. Please check the URL and try again.',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          "Failed to analyze the blog. Please check the URL and try again.",
+        variant: "destructive",
       });
     } finally {
       setIsAnalyzing(false);
@@ -71,7 +70,7 @@ export default function BlogAnalyzer() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !isAnalyzing) {
+    if (e.key === "Enter" && !isAnalyzing) {
       handleAnalyze();
     }
   };
@@ -106,20 +105,20 @@ export default function BlogAnalyzer() {
                   Analyzing...
                 </>
               ) : (
-                'Analyze'
+                "Analyze"
               )}
             </Button>
           </div>
-          
+
           <p className="text-white/60 text-sm">
-            Enter a blog URL to get comprehensive NLP analysis including sentiment, 
-            key topics, entities, and more.
+            Enter a blog URL to get comprehensive NLP analysis including
+            sentiment, key topics, entities, and more.
           </p>
         </CardContent>
       </Card>
 
       {(isAnalyzing || analysisData) && (
-        <AnalysisResults 
+        <AnalysisResults
           data={analysisData || {}}
           isLoading={isAnalyzing}
           title="Blog Analysis Results"
@@ -127,4 +126,4 @@ export default function BlogAnalyzer() {
       )}
     </div>
   );
-} 
+}

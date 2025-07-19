@@ -34,14 +34,15 @@ export const connectToDatabase = async () => {
     }
 
     if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined');
+      throw new Error("MONGODB_URI is not defined");
     }
 
     global.mongooseInstance = await mongoose.connect(process.env.MONGODB_URI);
     return global.mongooseInstance;
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
-    throw error;
+    if (process.env.NODE_ENV === "production") {
+      throw error;
+    }
   }
 };
 

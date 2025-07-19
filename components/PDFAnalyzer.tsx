@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { analyzePDF } from '@/lib/api';
-import AnalysisResults from './AnalysisResults';
-import { FileText, Upload, Loader2, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { analyzePDF } from "@/lib/api";
+import AnalysisResults from "./AnalysisResults";
+import { FileText, Upload, Loader2, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface AnalysisData {
   sentiment?: {
@@ -38,20 +38,20 @@ export default function PDFAnalyzer() {
   const { toast } = useToast();
 
   const handleFileSelect = (file: File) => {
-    if (file.type !== 'application/pdf') {
+    if (file.type !== "application/pdf") {
       toast({
-        title: 'Invalid File Type',
-        description: 'Please select a PDF file',
-        variant: 'destructive',
+        title: "Invalid File Type",
+        description: "Please select a PDF file",
+        variant: "destructive",
       });
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: 'File Too Large',
-        description: 'Please select a file smaller than 10MB',
-        variant: 'destructive',
+        title: "File Too Large",
+        description: "Please select a file smaller than 10MB",
+        variant: "destructive",
       });
       return;
     }
@@ -89,9 +89,9 @@ export default function PDFAnalyzer() {
   const handleAnalyze = async () => {
     if (!selectedFile) {
       toast({
-        title: 'No File Selected',
-        description: 'Please select a PDF file to analyze',
-        variant: 'destructive',
+        title: "No File Selected",
+        description: "Please select a PDF file to analyze",
+        variant: "destructive",
       });
       return;
     }
@@ -99,21 +99,19 @@ export default function PDFAnalyzer() {
     try {
       setIsAnalyzing(true);
       setAnalysisData(null);
-      
+
       const result = await analyzePDF(selectedFile);
-      console.log('PDF Analysis Result:', result);
       setAnalysisData(result);
-      
+
       toast({
-        title: 'Success',
-        description: 'PDF analysis completed successfully!',
+        title: "Success",
+        description: "PDF analysis completed successfully!",
       });
     } catch (error) {
-      console.error('Analysis error:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to analyze the PDF. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to analyze the PDF. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsAnalyzing(false);
@@ -124,16 +122,16 @@ export default function PDFAnalyzer() {
     setSelectedFile(null);
     setAnalysisData(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (
@@ -149,8 +147,8 @@ export default function PDFAnalyzer() {
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
               isDragOver
-                ? 'border-blue-400 bg-blue-400/10'
-                : 'border-white/20 hover:border-white/40'
+                ? "border-blue-400 bg-blue-400/10"
+                : "border-white/20 hover:border-white/40"
             }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -161,7 +159,9 @@ export default function PDFAnalyzer() {
                 <div className="flex items-center justify-center gap-3">
                   <FileText className="w-8 h-8 text-blue-400" />
                   <div className="text-left">
-                    <p className="text-white font-medium">{selectedFile.name}</p>
+                    <p className="text-white font-medium">
+                      {selectedFile.name}
+                    </p>
                     <p className="text-white/60 text-sm">
                       {formatFileSize(selectedFile.size)}
                     </p>
@@ -186,7 +186,7 @@ export default function PDFAnalyzer() {
                       Analyzing...
                     </>
                   ) : (
-                    'Analyze PDF'
+                    "Analyze PDF"
                   )}
                 </Button>
               </div>
@@ -195,7 +195,7 @@ export default function PDFAnalyzer() {
                 <Upload className="w-12 h-12 text-white/40 mx-auto" />
                 <div>
                   <p className="text-white mb-1">
-                    Drag and drop your PDF file here, or{' '}
+                    Drag and drop your PDF file here, or{" "}
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="text-blue-400 hover:text-blue-300 underline"
@@ -220,14 +220,14 @@ export default function PDFAnalyzer() {
           />
 
           <p className="text-white/60 text-sm">
-            Upload a PDF document to get comprehensive NLP analysis including sentiment,
-            key topics, entities, document statistics, and more.
+            Upload a PDF document to get comprehensive NLP analysis including
+            sentiment, key topics, entities, document statistics, and more.
           </p>
         </CardContent>
       </Card>
 
       {(isAnalyzing || analysisData) && (
-        <AnalysisResults 
+        <AnalysisResults
           data={analysisData || {}}
           isLoading={isAnalyzing}
           title="PDF Analysis Results"
@@ -235,4 +235,4 @@ export default function PDFAnalyzer() {
       )}
     </div>
   );
-} 
+}
