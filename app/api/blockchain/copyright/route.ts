@@ -12,15 +12,8 @@ const POLYGON_RPC_URL =
 const COPYRIGHT_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_COPYRIGHT_PROTECTION_ADDRESS;
 
-function generateContentHash(
-  content: string,
-  title: string,
-  authorId: string
-): string {
-  return crypto
-    .createHash("sha256")
-    .update(`${content}:${title}:${authorId}:${Date.now()}`)
-    .digest("hex");
+function generateContentHash(content: string): string {
+  return crypto.createHash("sha256").update(content.trim()).digest("hex");
 }
 
 async function verifyTransactionOnBlockchain(txHash: string): Promise<boolean> {
@@ -71,7 +64,7 @@ export async function POST(request: Request) {
           );
         }
 
-        const hash = generateContentHash(content, title, session.user.id);
+        const hash = generateContentHash(content);
 
         return NextResponse.json({
           contentHash: hash,
@@ -84,6 +77,26 @@ export async function POST(request: Request) {
           return NextResponse.json(
             {
               error: "Missing required fields: contentHash, txHash, title",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Validate transaction hash format
+        if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
+          return NextResponse.json(
+            {
+              error: "Invalid transaction hash format",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Validate articleId if provided
+        if (articleId && !/^[0-9a-fA-F]{24}$/.test(articleId)) {
+          return NextResponse.json(
+            {
+              error: "Invalid article ID format",
             },
             { status: 400 }
           );
@@ -119,12 +132,17 @@ export async function POST(request: Request) {
         await record.save();
 
         if (articleId) {
-          await Article.findByIdAndUpdate(articleId, {
-            $set: {
-              copyrightProtected: true,
-              copyrightTxHash: txHash,
-            },
-          });
+          try {
+            await Article.findByIdAndUpdate(articleId, {
+              $set: {
+                copyrightProtected: true,
+                copyrightTxHash: txHash,
+              },
+            });
+          } catch (articleError) {
+            console.error("Error updating article:", articleError);
+            // Continue even if article update fails
+          }
         }
 
         return NextResponse.json({
@@ -250,6 +268,14 @@ export async function GET(request: Request) {
     const contentHash = searchParams.get("contentHash");
 
     if (articleId) {
+      // Validate articleId format
+      if (!/^[0-9a-fA-F]{24}$/.test(articleId)) {
+        return NextResponse.json(
+          { error: "Invalid article ID format" },
+          { status: 400 }
+        );
+      }
+
       const record = await CopyrightRecord.findOne({
         articleId,
         authorId: session.user.id,

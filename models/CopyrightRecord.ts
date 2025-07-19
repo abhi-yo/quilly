@@ -78,7 +78,6 @@ const copyrightRecordSchema = new mongoose.Schema<ICopyrightRecord>({
 
 copyrightRecordSchema.index({ authorId: 1, createdAt: -1 });
 copyrightRecordSchema.index({ contentHash: 1, status: 1 });
-copyrightRecordSchema.index({ txHash: 1 });
 
 export const CopyrightRecord =
   mongoose.models.CopyrightRecord ||
