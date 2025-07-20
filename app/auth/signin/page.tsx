@@ -1,7 +1,7 @@
 "use client";
 
+import { Suspense, useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
@@ -14,13 +14,19 @@ export default function SignIn() {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const [searchParams, setSearchParams] = useState<ReturnType<typeof useSearchParams> | null>(null);
 
-  useEffect(() => {
-    if (searchParams.get("verified") === "true") {
-      setSuccess("Email verified successfully! You can now sign in.");
-    }
-  }, [searchParams]);
+  // Suspense boundary for useSearchParams
+  function SearchParamsSuspense() {
+    const params = useSearchParams();
+    useEffect(() => {
+      setSearchParams(params);
+      if (params.get("verified") === "true") {
+        setSuccess("Email verified successfully! You can now sign in.");
+      }
+    }, [params]);
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +58,9 @@ export default function SignIn() {
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6">
+      <Suspense>
+        <SearchParamsSuspense />
+      </Suspense>
       {/* Header */}
       <div className="text-center">
         <h1 className="text-2xl font-medium text-white">Welcome back</h1>

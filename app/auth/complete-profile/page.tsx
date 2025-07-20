@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,19 @@ import { UserIcon, PenIcon } from "lucide-react";
 export default function CompleteProfile() {
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [provider, setProvider] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { data: session, status, update } = useSession();
-  const provider = searchParams.get("provider");
+
+  // Suspense boundary for useSearchParams
+  function SearchParamsSuspense() {
+    const searchParams = useSearchParams();
+    const providerParam = searchParams.get("provider");
+    if (providerParam !== provider) {
+      setProvider(providerParam);
+    }
+    return null;
+  }
 
   if (status === "loading") {
     return (
@@ -70,17 +79,13 @@ export default function CompleteProfile() {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-gray-900 border-gray-800">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-white">
-            Complete Your Profile
-          </CardTitle>
-          <CardDescription className="text-gray-400">
-            {provider === "google" 
-              ? "Welcome! Please choose your role to get started."
-              : "Please select your role to continue."
-            }
-          </CardDescription>
+      <Suspense>
+        <SearchParamsSuspense />
+      </Suspense>
+      <Card className="w-full max-w-md bg-gray-900/40 border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-xl">Complete Your Profile</CardTitle>
+          <CardDescription>Choose how you want to use Quilly</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">

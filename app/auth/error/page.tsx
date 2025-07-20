@@ -1,12 +1,19 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function AuthError() {
-  const searchParams = useSearchParams();
-  const error = searchParams.get("error");
+  const [error, setError] = useState<string | null>(null);
+
+  function SearchParamsSuspense() {
+    const searchParams = useSearchParams();
+    const err = searchParams.get("error");
+    if (err !== error) setError(err);
+    return null;
+  }
 
   const getErrorMessage = (error: string | null) => {
     switch (error) {
@@ -41,6 +48,9 @@ export default function AuthError() {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <Suspense>
+        <SearchParamsSuspense />
+      </Suspense>
       <div className="w-full max-w-md mx-auto">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
