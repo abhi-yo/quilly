@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/toaster";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "Quilly",
@@ -27,15 +28,12 @@ export default function RootLayout({
         <meta name="twitter:description" content="A modern blogging platform for writers and readers" />
         <meta name="twitter:image" content="/images/og.png" />
       </head>
-      <body
-        className={`${GeistSans.className} antialiased bg-black text-white`}
-      >
-        <Script
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="lazyOnload"
-        />
+      <body className={`${GeistSans.className} antialiased bg-black text-white`}>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <Providers>{children}</Providers>
         <Toaster />
+        {/* Vercel Analytics */}
+        <Analytics />
       </body>
     </html>
   );
